@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Menu, Search, Moon, Sun, ChevronDown, X, User, Settings, LogOut } from "lucide-react";
-import { useAuth } from "../context/useAuth";
+import { useAuth } from "../context/AuthContext";
 
 const PAGE_ROUTES = [
   { name: "Dashboard", path: "/dashboard" },

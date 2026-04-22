@@ -16,12 +16,17 @@ import Profile from "../pages/Profile";
 import Settings from "../pages/Settings";
 import Reports from "../pages/Reports";
 import DailyReport from "../pages/DailyReport";
+import Register from "../pages/Register";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Navigate to="/login" replace />,
   },
+  {
+  path: "/register",
+  element: <Register />,
+},
   {
     path: "/login",
     element: <Login />,

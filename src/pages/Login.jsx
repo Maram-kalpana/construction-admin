@@ -1,7 +1,7 @@
 import { useState } from "react";
 // 👇 FIX 1: CheckCircle2 icon import kiya features list ke liye
 import { Eye, EyeOff, LogIn, Building2, CheckCircle2 } from "lucide-react";
-import { useAuth } from "../context/useAuth";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
@@ -14,50 +14,21 @@ export default function Login() {
     password: "",
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const users = [
-      {
-        username: "admin",
-        password: "admin123",
-        name: "Admin User",
-        role: "admin",
-      },
-      {
-        username: "manager",
-        password: "manager123",
-        name: "Manager User",
-        role: "manager",
-      },
-      {
-        username: "supervisor",
-        password: "supervisor123",
-        name: "Supervisor User",
-        role: "supervisor",
-      },
-    ];
+  const success = await login({
+    login: form.username.trim(),   // 👈 THIS MUST BE EMAIL
+    password: form.password,
+  });
 
-    const foundUser = users.find(
-      (u) =>
-        u.username === form.username.trim() &&
-        u.password === form.password.trim()
-    );
+  if (!success) {
+    alert("Invalid credentials ❌");
+    return;
+  }
 
-    if (!foundUser) {
-      alert("Invalid username or password");
-      return;
-    }
-
-    login({
-      username: foundUser.username,
-      name: foundUser.name,
-      role: foundUser.role,
-    });
-
-    navigate("/dashboard", { replace: true });
-  };
-
+  navigate("/dashboard", { replace: true });
+};
   return (
     <div className="fixed inset-0 bg-slate-50 flex items-center justify-center p-4 sm:p-8 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       
@@ -192,6 +163,15 @@ export default function Login() {
                 Sign In
               </button>
             </form>
+            <p className="mt-6 text-sm text-center text-slate-500">
+  Don’t have an account?{" "}
+  <span
+    className="text-blue-600 cursor-pointer"
+    onClick={() => navigate("/register")}
+  >
+    Register
+  </span>
+</p>
 
             <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:hidden">
               <p className="text-sm font-bold text-slate-900 tracking-wide uppercase">Demo Access</p>

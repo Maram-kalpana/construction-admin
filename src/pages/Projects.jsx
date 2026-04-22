@@ -7,6 +7,14 @@ import {
   X,
   ChevronDown,
 } from "lucide-react"; // 👈 Yahan se 'Calendar' hata diya hai
+import {
+  getProjects,
+  addProject,
+  deleteProjectApi,
+  updateProjectApi,
+  getUsers,
+} from "../api/projectApi"; 
+// 👈 since you stored APIs here
 import AdminLayout from "../components/AdminLayout";
 
 const initialProjectData = [
@@ -59,11 +67,8 @@ function SlidePanel({ open, onClose, children }) {
 }
 
 const Projects = () => {
-  const [projects, setProjects] = useState(() => {
-    const saved = localStorage.getItem("projectsData");
-    return saved ? JSON.parse(saved) : initialProjectData;
-  });
-
+const [projects, setProjects] = useState([]);
+const [managers, setManagers] = useState([]);
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [openAddPanel, setOpenAddPanel] = useState(false);
@@ -80,8 +85,35 @@ const Projects = () => {
   });
 
   useEffect(() => {
-    localStorage.setItem("projectsData", JSON.stringify(projects));
-  }, [projects]);
+  fetchProjects();
+  fetchManagers();
+}, []);
+
+const fetchProjects = async () => {
+  try {
+    const res = await getProjects();
+    console.log("PROJECT LIST ✅", res.data);
+
+    setProjects(res.data.data || res.data);
+  } catch (error) {
+    console.error("ERROR ❌", error);
+  }
+};
+
+const fetchManagers = async () => {
+  try {
+    const res = await getUsers();
+    console.log("MANAGERS 👉", res.data);
+
+    const managersList = res.data.data.filter(
+      (u) => u.role === "Manager"
+    );
+
+    setManagers(managersList);
+  } catch (error) {
+    console.error("MANAGER ERROR ❌", error);
+  }
+};
 
   const filtered = useMemo(() => {
     return projects.filter((project) => {
@@ -91,9 +123,8 @@ const Projects = () => {
       const matchesSearch =
         project.name.toLowerCase().includes(q) ||
         project.location.toLowerCase().includes(q) ||
-        project.manager.toLowerCase().includes(q) ||
-        project.startDate.toLowerCase().includes(q);
-
+        (project.manager?.name || "").toLowerCase().includes(q) ||
+(project.start_date || "").toLowerCase().includes(q)
       return matchesFilter && matchesSearch;
     });
   }, [projects, filter, search]);
@@ -101,7 +132,7 @@ const Projects = () => {
   const resetForm = () => {
     setForm({
       name: "",
-      manager: "",
+      manager_id: "",
       location: "",
       startDate: "",
       budget: "",
@@ -109,31 +140,38 @@ const Projects = () => {
     });
   };
 
-  const handleAddProject = () => {
-    if (!form.name.trim()) return alert("Please enter project name");
-    if (!form.manager.trim()) return alert("Please assign manager");
-    if (!form.location.trim()) return alert("Please enter location");
-    if (!form.startDate) return alert("Please select start date");
-    if (!form.budget.trim()) return alert("Please enter budget");
-
-    const newProject = {
-      id: Date.now(),
+  
+   const handleAddProject = async () => {
+  try {
+    const payload = {
       name: form.name,
-      manager: form.manager,
-      startDate: form.startDate,
+      manager_id: Number(form.manager_id),
       location: form.location,
-      budget: form.budget,
-      status: form.status,
+      start_date: form.startDate,
+      status: form.status === "Active",
     };
 
-    setProjects((prev) => [...prev, newProject]);
+    await addProject(payload);
+
+    alert("Project added ✅");
     setOpenAddPanel(false);
     resetForm();
-  };
+    fetchProjects();
+  } catch (error) {
+    console.error("ADD ERROR ❌", error.response?.data);
+  }
+};
 
-  const handleDeleteProject = (id) => {
-    setProjects((prev) => prev.filter((project) => project.id !== id));
-  };
+   
+
+  const handleDeleteProject = async (id) => {
+  try {
+    await deleteProjectApi(id);
+    setProjects((prev) => prev.filter((p) => p.id !== id));
+  } catch (error) {
+    console.error("DELETE ERROR ❌", error);
+  }
+};
 
   const handleEditClick = (project) => {
     setEditingId(project.id);
@@ -155,21 +193,27 @@ const Projects = () => {
     if (!form.startDate) return alert("Please select start date");
     if (!form.budget.trim()) return alert("Please enter budget");
 
-    setProjects((prev) =>
-      prev.map((project) =>
-        project.id === editingId
-          ? {
-              ...project,
-              name: form.name,
-              manager: form.manager,
-              location: form.location,
-              startDate: form.startDate,
-              budget: form.budget,
-              status: form.status,
-            }
-          : project
-      )
-    );
+    const handleUpdateProject = async () => {
+  try {
+    const payload = {
+      name: form.name,
+      manager_id: 1,
+      location: form.location,
+      start_date: form.startDate,
+      status: form.status === "Active",
+    };
+
+    await updateProjectApi(editingId, payload);
+
+    alert("Updated ✅");
+    setOpenEditPanel(false);
+    setEditingId(null);
+    resetForm();
+    fetchProjects();
+  } catch (error) {
+    console.error("UPDATE ERROR ❌", error.response?.data);
+  }
+};
 
     setOpenEditPanel(false);
     setEditingId(null);
@@ -263,16 +307,16 @@ const Projects = () => {
                       {project.name}
                     </td>
                     <td className="py-4 px-5 text-muted-foreground">
-                      {project.manager}
+                      {project.manager?.name || "-"}
                     </td>
                     <td className="py-4 px-5 text-muted-foreground">
-                      {project.startDate}
+                      {project.start_date || "-"}
                     </td>
                     <td className="py-4 px-5 text-muted-foreground">
                       {project.location}
                     </td>
                     <td className="py-4 px-5 font-medium text-foreground">
-                      {project.budget}
+                     {project.budget || "-"}
                     </td>
                     <td className="py-4 px-5">
                       <span
@@ -280,7 +324,7 @@ const Projects = () => {
                           statusColors[project.status]
                         }`}
                       >
-                        {project.status}
+                        {project.status ? "Active" : "Inactive"}
                       </span>
                     </td>
                     <td className="py-4 px-5">
@@ -333,15 +377,23 @@ const Projects = () => {
 
             <div className="relative">
               <select
-                value={form.manager}
-                onChange={(e) => setForm((prev) => ({ ...prev, manager: e.target.value }))}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground outline-none appearance-none focus:ring-2 focus:ring-primary/30"
-              >
-                <option value="">Assign manager</option>
-                <option value="Site Manager">Site Manager</option>
-                <option value="Project Manager">Project Manager</option>
-                <option value="Supervisor">Supervisor</option>
-              </select>
+  value={form.manager_id}
+  onChange={(e) =>
+    setForm((prev) => ({
+      ...prev,
+      manager_id: e.target.value,
+    }))
+  }
+  className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10"
+>
+  <option value="">Select Manager</option>
+
+  {managers.map((m) => (
+    <option key={m.id} value={m.id}>
+      {m.name}
+    </option>
+  ))}
+</select>
               <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             </div>
 

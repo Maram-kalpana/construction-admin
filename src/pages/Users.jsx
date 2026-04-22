@@ -8,6 +8,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import AdminLayout from "../components/AdminLayout";
+import { getUsers, createUser } from "../api/projectApi";
 
 const initialUsersData = [
   {
@@ -64,10 +65,7 @@ export default function Users() {
   const [activeTab, setActiveTab] = useState("users");
   const [search, setSearch] = useState("");
 
-  const [users, setUsers] = useState(() => {
-    const saved = localStorage.getItem("usersData");
-    return saved ? JSON.parse(saved) : initialUsersData;
-  });
+  const [users, setUsers] = useState([]);
 
   const [vendors, setVendors] = useState(() => {
     const saved = localStorage.getItem("vendorsData");
@@ -99,9 +97,19 @@ export default function Users() {
   });
 
   useEffect(() => {
-    localStorage.setItem("usersData", JSON.stringify(users));
-    window.dispatchEvent(new Event("dashboard-data-updated"));
-  }, [users]);
+  fetchUsers();
+}, []);
+
+const fetchUsers = async () => {
+  try {
+    const res = await getUsers();
+    console.log("USERS API 👉", res.data);
+
+    setUsers(res.data.data || []);
+  } catch (error) {
+    console.error("FETCH USERS ERROR ❌", error);
+  }
+};
 
   useEffect(() => {
     localStorage.setItem("vendorsData", JSON.stringify(vendors));
@@ -109,16 +117,16 @@ export default function Users() {
   }, [vendors]);
 
   const filteredUsers = useMemo(() => {
-    const q = search.toLowerCase();
-    return users.filter(
-      (u) =>
-        u.name.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q) ||
-        u.role.toLowerCase().includes(q) ||
-        (u.project && u.project.toLowerCase().includes(q)) ||
-        u.username.toLowerCase().includes(q)
-    );
-  }, [search, users]);
+  const q = search.toLowerCase();
+
+  return users.filter(
+    (u) =>
+      (u.name || "").toLowerCase().includes(q) ||
+      (u.email || "").toLowerCase().includes(q) ||
+      (u.role || "").toLowerCase().includes(q) ||
+      (u.phone?.toString() || "").includes(q)
+  );
+}, [search, users]);
 
   const filteredVendors = useMemo(() => {
     const q = search.toLowerCase();
@@ -150,7 +158,8 @@ export default function Users() {
     });
   };
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
+  try {
     if (!userForm.name.trim()) {
       alert("Please enter name");
       return;
@@ -166,22 +175,24 @@ export default function Users() {
       return;
     }
 
-    if (!userForm.username.trim()) {
-      alert("Please enter username");
-      return;
-    }
+    const payload = {
+  name: userForm.name,
+  email: userForm.email,
+  phone: userForm.phone,
+  password: userForm.password,
+  role: userForm.role.toLowerCase(),
+  status: userForm.status === "Active" ? 1 : 0, // ✅ ADD THIS
+};
+    await createUser(payload);
 
-    const newUser = {
-      id: Date.now(),
-      ...userForm,
-      project: "N/A", // Default value kyunki project field hata diya hai
-      password: userForm.password || "********",
-    };
-
-    setUsers((prev) => [...prev, newUser]);
+    alert("User created ✅");
     setOpenAddUserPanel(false);
     resetUserForm();
-  };
+    fetchUsers();
+  } catch (error) {
+    console.error("ADD USER ERROR ❌", error.response?.data);
+  }
+};
 
   const handleEditUserClick = (user) => {
     setEditingUserId(user.id);
@@ -421,12 +432,12 @@ export default function Users() {
                       <td className="py-3 px-4">
                         <span
                           className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                            user.status === "Active"
+                          user.status ? "Active" : "Inactive"
                               ? "bg-green-100 text-green-600"
                               : "bg-slate-100 text-slate-500"
                           }`}
                         >
-                          {user.status}
+                          {user.status ? "Active" : "Inactive"}
                         </span>
                       </td>
                       <td className="py-3 px-4">
