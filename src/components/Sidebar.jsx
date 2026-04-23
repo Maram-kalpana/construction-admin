@@ -113,6 +113,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       items: [
         { label: "Projects", icon: FolderKanban, path: "/dashboard/projects" },
         { label: "Users", icon: Users, path: "/dashboard/users" },
+        { label: "Vendors", icon: Truck, path: "/dashboard/vendors" },
         { label: "Accounts", icon: Shield, path: "/dashboard/accounts" },
       ],
     },

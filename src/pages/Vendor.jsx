@@ -24,12 +24,11 @@ export default function Vendor() {
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({
-    name: "",
-    contact: "",
-    notes: "",
-    type: "labour",
-  });
-
+  name: "",
+  contact: "",
+  type: [], 
+});
+const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   useEffect(() => {
     fetchVendors();
   }, []);
@@ -53,7 +52,7 @@ export default function Vendor() {
         name: form.name,
         contact: form.contact,
         notes: form.notes,
-        type: [form.type],
+        type: form.type,
       };
 
       if (editId) {
@@ -103,13 +102,13 @@ export default function Vendor() {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-4 pt-1">
-        <p className="text-sm text-muted-foreground">
-          {vendors.length} vendor accounts
-        </p>
+  <AdminLayout>
+    <div className="space-y-4">
 
-        {/* 🔥 ADD BUTTON */}
+      {/* HEADER */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Vendors</h2>
+
         <button
           onClick={() => {
             setEditId(null);
@@ -119,49 +118,43 @@ export default function Vendor() {
         >
           + Add Vendor
         </button>
+      </div>
 
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search vendors..."
-            className="w-full h-10 pl-10 pr-4 border rounded-lg"
-          />
-        </div>
+      {/* SEARCH */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search vendors..."
+          className="w-full h-10 pl-10 pr-4 border rounded-lg"
+        />
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((vendor, index) => {
-            const colorConfig = cardColors[index % cardColors.length];
+      {/* TABLE */}
+      <div className="border rounded-xl overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-100 text-left">
+            <tr>
+              <th className="p-3">Type</th>
+              <th className="p-3">Name</th>
+              <th className="p-3">Contact</th>
+              <th className="p-3 text-right">Actions</th>
+            </tr>
+          </thead>
 
-            return (
-              <motion.div
-                key={vendor.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`rounded-xl p-5 ${colorConfig.bgClass}`}
-              >
-                <div className="flex justify-between mb-4">
-                  <div className="flex gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${colorConfig.iconClass}`}>
-                      {getInitials(vendor.name)}
-                    </div>
-                    <div>
-                      <h3>{vendor.name}</h3>
-                      <p>{(vendor.type?.[0] || "N/A") + " Vendor"}</p>
-                    </div>
-                  </div>
-                  <span className="text-green-500 text-xs">Active</span>
-                </div>
+          <tbody>
+            {filtered.map((vendor) => (
+              <tr key={vendor.id} className="border-t">
+                <td className="p-3 capitalize">
+                  {vendor.type?.[0]}
+                </td>
 
-                <div className="space-y-1 mb-3 text-sm">
-                  <div className="flex gap-2"><Mail size={14} /> N/A</div>
-                  <div className="flex gap-2"><Phone size={14} /> {vendor.contact}</div>
-                  <div className="flex gap-2"><MapPin size={14} /> {vendor.notes || "N/A"}</div>
-                </div>
+                <td className="p-3">{vendor.name}</td>
 
-                {/* 🔥 ACTION BUTTONS */}
-                <div className="flex gap-4">
+                <td className="p-3">{vendor.contact}</td>
+
+                <td className="p-3 text-right space-x-3">
                   <button
                     onClick={() => {
                       setEditId(vendor.id);
@@ -169,7 +162,7 @@ export default function Vendor() {
                         name: vendor.name,
                         contact: vendor.contact,
                         notes: vendor.notes,
-                        type: vendor.type?.[0] || "labour",
+                        type: vendor.type || [],
                       });
                       setShowModal(true);
                     }}
@@ -180,69 +173,110 @@ export default function Vendor() {
                   <button onClick={() => handleDelete(vendor.id)}>
                     🗑
                   </button>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+    </div>
 
-      {/* 🔥 MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md">
-            <h2 className="mb-4">
-              {editId ? "Edit Vendor" : "Add Vendor"}
-            </h2>
+    {/* MODAL */}
+    {showModal && (
+  <div className="fixed inset-0 z-50 flex">
 
-            <form onSubmit={handleSave} className="space-y-3">
-              <input
-                placeholder="Name"
-                className="w-full border p-2"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
+    {/* OVERLAY */}
+    <div
+      className="flex-1 bg-black/40"
+      onClick={() => setShowModal(false)}
+    />
 
-              <input
-                placeholder="Contact"
-                className="w-full border p-2"
-                value={form.contact}
-                onChange={(e) => setForm({ ...form, contact: e.target.value })}
-              />
+    {/* RIGHT DRAWER */}
+    <div className="w-full max-w-md bg-white h-full shadow-xl p-6 animate-slideIn">
 
-              <input
-                placeholder="Notes"
-                className="w-full border p-2"
-                value={form.notes}
-                onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              />
+      <h2 className="text-2xl font-semibold mb-6">
+        {editId ? "Edit vendor" : "Add vendor"}
+      </h2>
 
-              <select
-                className="w-full border p-2"
-                value={form.type}
-                onChange={(e) => setForm({ ...form, type: e.target.value })}
-              >
-                <option value="labour">Labour</option>
-                <option value="material">Material</option>
-                <option value="machinery">Machinery</option>
-              </select>
+      <form onSubmit={handleSave} className="space-y-5">
 
-              <div className="flex gap-2">
-                <button className="bg-blue-600 text-white px-4 py-2">
-                  Save
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="border px-4 py-2"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </AdminLayout>
-  );
+        {/* TYPE */}
+        <div className="relative">
+  {/* INPUT BOX */}
+  <div
+    onClick={() => setShowTypeDropdown(!showTypeDropdown)}
+    className="w-full h-14 border rounded-2xl px-4 flex items-center justify-between cursor-pointer"
+  >
+    <span className="text-gray-600">
+      {form.type.length > 0
+        ? form.type.join(", ")
+        : "Select Type"}
+    </span>
+    <span>⌄</span>
+  </div>
+
+  {/* DROPDOWN */}
+  {showTypeDropdown && (
+    <div className="absolute top-16 w-full bg-white border rounded-xl shadow-md z-10">
+
+      {["labour", "material", "machinery"].map((item) => (
+        <label
+          key={item}
+          className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+        >
+          <input
+            type="checkbox"
+            checked={form.type.includes(item)}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setForm({
+                  ...form,
+                  type: [...form.type, item],
+                });
+              } else {
+                setForm({
+                  ...form,
+                  type: form.type.filter((t) => t !== item),
+                });
+              }
+            }}
+          />
+          <span className="capitalize">{item}</span>
+        </label>
+      ))}
+
+    </div>
+  )}
+</div>
+
+        {/* NAME */}
+        <input
+          placeholder="Name"
+          className="w-full h-14 border rounded-2xl px-4"
+          value={form.name}
+          onChange={(e) =>
+            setForm({ ...form, name: e.target.value })
+          }
+        />
+
+        {/* CONTACT */}
+        <input
+          placeholder="Contact"
+          className="w-full h-14 border rounded-2xl px-4"
+          value={form.contact}
+          onChange={(e) =>
+            setForm({ ...form, contact: e.target.value })
+          }
+        />
+
+        {/* SAVE BUTTON */}
+        <button className="w-full bg-blue-600 text-white py-4 rounded-2xl text-lg mt-4">
+          Save
+        </button>
+      </form>
+    </div>
+  </div>
+)}
+  </AdminLayout>
+);
 }

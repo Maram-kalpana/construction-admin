@@ -20,14 +20,22 @@ export const getProjectById = (id) =>
   api.get(`/admin/projects/show/${id}`);
 
 // GET ALL USERS
-export const getUsers = () => {
-  return api.get("/admin/users/list-all-users");
-};
+// export const getUsers = () => {
+//   return api.get("/admin/users/list-all-users");
+// };
 
 export const createUser = (data) => {
   return api.post("/admin/users/create", data);
 };
-
+export const deleteUserApi = (id) => {
+  return api.delete(`/admin/users/delete/${id}`);
+};
+export const getUsers = (params) => {
+  return api.get("/admin/users", { params });
+};
+export const updateUserApi = (id, data) => {
+  return api.post(`/admin/users/update/${id}`, data);
+};
 // GET ALL (no pagination)
 export const getVendors = () => {
   return api.get("/admin/vendors/list-all");
