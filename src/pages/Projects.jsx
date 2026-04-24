@@ -6,56 +6,25 @@ import {
   Trash2,
   X,
   ChevronDown,
-} from "lucide-react"; // 👈 Yahan se 'Calendar' hata diya hai
+} from "lucide-react";
 import {
   getProjects,
   addProject,
   deleteProjectApi,
   updateProjectApi,
   getUsers,
-} from "../api/projectApi"; 
-// 👈 since you stored APIs here
+} from "../api/projectApi";
 import AdminLayout from "../components/AdminLayout";
 
-const initialProjectData = [
-  {
-    id: 1,
-    name: "Project Alpha",
-    manager: "Site Manager",
-    startDate: "2026-01-15",
-    location: "Hyderabad",
-    budget: "₹5L",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Project Beta",
-    manager: "Project Manager",
-    startDate: "2026-02-10",
-    location: "Bangalore",
-    budget: "₹8L",
-    status: "Pending",
-  },
-  {
-    id: 3,
-    name: "Project Gamma",
-    manager: "Supervisor",
-    startDate: "2026-03-05",
-    location: "Chennai",
-    budget: "₹6L",
-    status: "Inactive",
-  },
-];
-
 const statusColors = {
-  Active: "bg-green-100 text-green-600",
+  Active:   "bg-green-100 text-green-600",
   Inactive: "bg-red-100 text-red-600",
-  Pending: "bg-amber-100 text-amber-600",
+  Pending:  "bg-amber-100 text-amber-600",
 };
 
+// ─── Slide Panel ────────────────────────────────────────────────────────────
 function SlidePanel({ open, onClose, children }) {
   if (!open) return null;
-
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/20" onClick={onClose} />
@@ -66,174 +35,317 @@ function SlidePanel({ open, onClose, children }) {
   );
 }
 
+// ─── Labeled Input ───────────────────────────────────────────────────────────
+function LabeledInput({ label, type = "text", value, onChange, placeholder }) {
+  return (
+    <div className="relative">
+      {label && (
+        <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground z-10">
+          {label}
+        </label>
+      )}
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30 dark:[color-scheme:dark]"
+      />
+    </div>
+  );
+}
+
+// ─── Labeled Select ──────────────────────────────────────────────────────────
+function LabeledSelect({ label, value, onChange, children }) {
+  return (
+    <div className="relative">
+      {label && (
+        <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground z-10">
+          {label}
+        </label>
+      )}
+      <select
+        value={value}
+        onChange={onChange}
+        className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground outline-none appearance-none focus:ring-2 focus:ring-primary/30"
+      >
+        {children}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+    </div>
+  );
+}
+
+// ─── Main Component ──────────────────────────────────────────────────────────
 const Projects = () => {
-const [projects, setProjects] = useState([]);
-const [managers, setManagers] = useState([]);
-  const [filter, setFilter] = useState("All");
-  const [search, setSearch] = useState("");
-  const [openAddPanel, setOpenAddPanel] = useState(false);
+  const [projects, setProjects]   = useState([]);
+  const [managers, setManagers]   = useState([]);
+  const [filter,   setFilter]     = useState("All");
+  const [search,   setSearch]     = useState("");
+  const [openAddPanel,  setOpenAddPanel]  = useState(false);
   const [openEditPanel, setOpenEditPanel] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading]     = useState(false);
 
-  const [form, setForm] = useState({
-    name: "",
-    manager: "",
-    location: "",
-    startDate: "",
-    budget: "",
-    status: "Active",
-  });
+  const emptyForm = {
+    name: "", manager_id: "", location: "",
+    startDate: "", budget: "", status: "Active",
+  };
+  const [form, setForm] = useState(emptyForm);
 
+  // ── Fetch on mount ──────────────────────────────────────────────────────
   useEffect(() => {
-  fetchProjects();
-  fetchManagers();
-}, []);
+    fetchProjects();
+    fetchManagers();
+  }, []);
 
-const fetchProjects = async () => {
-  try {
-    const res = await getProjects();
-    console.log("PROJECT LIST ✅", res.data);
+  const fetchProjects = async () => {
+    try {
+      const res = await getProjects();
+      // Handle both { data: [...] } and { data: { data: [...] } }
+      const list = res.data?.data ?? res.data ?? [];
+      setProjects(Array.isArray(list) ? list : []);
+    } catch (err) {
+      console.error("fetchProjects ❌", err);
+    }
+  };
 
-    setProjects(res.data.data || res.data);
-  } catch (error) {
-    console.error("ERROR ❌", error);
-  }
-};
+  const fetchManagers = async () => {
+    try {
+      const res = await getUsers();
+      console.log("RAW getUsers response 👉", res.data);
 
-const fetchManagers = async () => {
-  try {
-    const res = await getUsers();
-    console.log("MANAGERS 👉", res.data);
+      // Support multiple response shapes
+      const allUsers = res.data?.data ?? res.data?.users ?? res.data ?? [];
+      const list = Array.isArray(allUsers) ? allUsers : [];
 
-    const managersList = res.data.data.filter(
-      (u) => u.role === "Manager"
-    );
+      console.log("All users list 👉", list);
 
-    setManagers(managersList);
-  } catch (error) {
-    console.error("MANAGER ERROR ❌", error);
-  }
-};
+      // ── FIX: case-insensitive role match + fallback (show ALL if none match) ──
+      const MANAGER_ROLES = ["manager", "project manager", "site manager", "supervisor"];
 
+      let filtered = list.filter((u) =>
+        MANAGER_ROLES.includes((u.role ?? u.user_role ?? "").toLowerCase())
+      );
+
+      // If API returns no role field or none matched, show everyone so
+      // the dropdown is never empty (you can tighten this once you confirm field name)
+      if (filtered.length === 0) {
+        console.warn(
+          "No users matched manager roles — showing all users as fallback.\n" +
+          "Check the 'role' field name in your user object:",
+          list[0]
+        );
+        filtered = list;
+      }
+
+      setManagers(filtered);
+    } catch (err) {
+      console.error("fetchManagers ❌", err);
+    }
+  };
+
+  // ── Filtered table rows ─────────────────────────────────────────────────
   const filtered = useMemo(() => {
-    return projects.filter((project) => {
-      const matchesFilter = filter === "All" ? true : project.status === filter;
-      const q = search.toLowerCase();
+    const q = search.toLowerCase();
+    return projects.filter((p) => {
+      const matchStatus = filter === "All" || p.status === filter ||
+        // handle boolean status from API
+        (filter === "Active"   && p.status === true) ||
+        (filter === "Inactive" && p.status === false);
 
-      const matchesSearch =
-        project.name.toLowerCase().includes(q) ||
-        project.location.toLowerCase().includes(q) ||
-        (project.manager?.name || "").toLowerCase().includes(q) ||
-(project.start_date || "").toLowerCase().includes(q)
-      return matchesFilter && matchesSearch;
+      const managerName = (p.manager?.name ?? p.manager ?? "").toLowerCase();
+      const matchSearch =
+        (p.name        ?? "").toLowerCase().includes(q) ||
+        (p.location    ?? "").toLowerCase().includes(q) ||
+        managerName.includes(q) ||
+        (p.start_date  ?? p.startDate ?? "").includes(q);
+
+      return matchStatus && matchSearch;
     });
   }, [projects, filter, search]);
 
-  const resetForm = () => {
-    setForm({
-      name: "",
-      manager_id: "",
-      location: "",
-      startDate: "",
-      budget: "",
-      status: "Active",
-    });
+  const resetForm = () => setForm(emptyForm);
+
+  // ── Add Project ─────────────────────────────────────────────────────────
+  const handleAddProject = async () => {
+    if (!form.name.trim())       return alert("Please enter project name");
+    if (!form.manager_id)        return alert("Please select a manager");
+    if (!form.location.trim())   return alert("Please enter location");
+    if (!form.startDate)         return alert("Please select start date");
+
+    try {
+      setLoading(true);
+      const payload = {
+        name:       form.name.trim(),
+        manager_id: Number(form.manager_id),
+        location:   form.location.trim(),
+        start_date: form.startDate,
+        budget:     form.budget.trim() || undefined,
+        status:     form.status === "Active",
+      };
+      await addProject(payload);
+      setOpenAddPanel(false);
+      resetForm();
+      fetchProjects();
+    } catch (err) {
+      console.error("addProject ❌", err.response?.data ?? err);
+      alert("Failed to add project. Check console for details.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  
-   const handleAddProject = async () => {
-  try {
-    const payload = {
-      name: form.name,
-      manager_id: Number(form.manager_id),
-      location: form.location,
-      start_date: form.startDate,
-      status: form.status === "Active",
-    };
-
-    await addProject(payload);
-
-    alert("Project added ✅");
-    setOpenAddPanel(false);
-    resetForm();
-    fetchProjects();
-  } catch (error) {
-    console.error("ADD ERROR ❌", error.response?.data);
-  }
-};
-
-   
-
-  const handleDeleteProject = async (id) => {
-  try {
-    await deleteProjectApi(id);
-    setProjects((prev) => prev.filter((p) => p.id !== id));
-  } catch (error) {
-    console.error("DELETE ERROR ❌", error);
-  }
-};
-
+  // ── Edit Click ──────────────────────────────────────────────────────────
   const handleEditClick = (project) => {
     setEditingId(project.id);
     setForm({
-      name: project.name,
-      manager: project.manager,
-      location: project.location,
-      startDate: project.startDate,
-      budget: project.budget,
-      status: project.status,
+      name:       project.name        ?? "",
+      manager_id: project.manager?.id ?? project.manager_id ?? "",
+      location:   project.location    ?? "",
+      startDate:  project.start_date  ?? project.startDate ?? "",
+      budget:     project.budget      ?? "",
+      status:     project.status === true  ? "Active"
+                : project.status === false ? "Inactive"
+                : project.status           ?? "Active",
     });
     setOpenEditPanel(true);
   };
 
-  const handleUpdateProject = () => {
-    if (!form.name.trim()) return alert("Please enter project name");
-    if (!form.manager.trim()) return alert("Please assign manager");
+  // ── Update Project ──────────────────────────────────────────────────────
+  const handleUpdateProject = async () => {
+    if (!form.name.trim())     return alert("Please enter project name");
+    if (!form.manager_id)      return alert("Please select a manager");
     if (!form.location.trim()) return alert("Please enter location");
-    if (!form.startDate) return alert("Please select start date");
-    if (!form.budget.trim()) return alert("Please enter budget");
+    if (!form.startDate)       return alert("Please select start date");
 
-    const handleUpdateProject = async () => {
-  try {
-    const payload = {
-      name: form.name,
-      manager_id: 1,
-      location: form.location,
-      start_date: form.startDate,
-      status: form.status === "Active",
-    };
-
-    await updateProjectApi(editingId, payload);
-
-    alert("Updated ✅");
-    setOpenEditPanel(false);
-    setEditingId(null);
-    resetForm();
-    fetchProjects();
-  } catch (error) {
-    console.error("UPDATE ERROR ❌", error.response?.data);
-  }
-};
-
-    setOpenEditPanel(false);
-    setEditingId(null);
-    resetForm();
+    try {
+      setLoading(true);
+      const payload = {
+        name:       form.name.trim(),
+        manager_id: Number(form.manager_id),
+        location:   form.location.trim(),
+        start_date: form.startDate,
+        budget:     form.budget.trim() || undefined,
+        status:     form.status === "Active",
+      };
+      await updateProjectApi(editingId, payload);
+      setOpenEditPanel(false);
+      setEditingId(null);
+      resetForm();
+      fetchProjects();
+    } catch (err) {
+      console.error("updateProject ❌", err.response?.data ?? err);
+      alert("Failed to update project. Check console for details.");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // ── Delete Project ──────────────────────────────────────────────────────
+  const handleDeleteProject = async (id) => {
+    if (!window.confirm("Delete this project?")) return;
+    try {
+      await deleteProjectApi(id);
+      setProjects((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error("deleteProject ❌", err);
+      alert("Failed to delete project.");
+    }
+  };
+
+  // ── Helper: display status ──────────────────────────────────────────────
+  const displayStatus = (status) => {
+    if (status === true  || status === "Active")   return "Active";
+    if (status === false || status === "Inactive") return "Inactive";
+    return status ?? "-";
+  };
+
+  // ── Manager Dropdown Options ────────────────────────────────────────────
+  const ManagerOptions = () => (
+    <>
+      <option value="">Select Manager</option>
+      {managers.map((m) => (
+        <option key={m.id} value={m.id}>
+          {m.name ?? m.full_name ?? m.username ?? `User #${m.id}`}
+        </option>
+      ))}
+    </>
+  );
+
+  // ── Shared Form Fields ──────────────────────────────────────────────────
+  const FormFields = ({ isEdit = false }) => (
+    <div className="px-6 space-y-5">
+      <LabeledInput
+        label="Project Name"
+        value={form.name}
+        onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+        placeholder="Enter project name"
+      />
+
+      {/* Manager Dropdown */}
+      <LabeledSelect
+        label="Assign Manager"
+        value={form.manager_id}
+        onChange={(e) => setForm((p) => ({ ...p, manager_id: e.target.value }))}
+      >
+        <ManagerOptions />
+      </LabeledSelect>
+
+      <LabeledInput
+        label="Location"
+        value={form.location}
+        onChange={(e) => setForm((p) => ({ ...p, location: e.target.value }))}
+        placeholder="Enter location"
+      />
+
+      <LabeledInput
+        label="Start Date"
+        type="date"
+        value={form.startDate}
+        onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))}
+      />
+
+      <LabeledInput
+        label="Budget"
+        value={form.budget}
+        onChange={(e) => setForm((p) => ({ ...p, budget: e.target.value }))}
+        placeholder="e.g. ₹5L"
+      />
+
+      <LabeledSelect
+        label="Status"
+        value={form.status}
+        onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
+      >
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+        <option value="Pending">Pending</option>
+      </LabeledSelect>
+
+      <button
+        onClick={isEdit ? handleUpdateProject : handleAddProject}
+        disabled={loading}
+        className="w-full h-12 mt-2 rounded-2xl bg-primary text-white font-semibold shadow-md shadow-primary/25 hover:opacity-90 transition disabled:opacity-60"
+      >
+        {loading ? "Saving..." : isEdit ? "Update Project" : "Add Project"}
+      </button>
+    </div>
+  );
+
+  // ── Render ──────────────────────────────────────────────────────────────
   return (
     <>
       <AdminLayout>
         <div className="space-y-4">
+
+          {/* Top bar */}
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <p className="text-sm md:text-[15px] leading-6 text-muted-foreground">
               {projects.length} total construction projects.
             </p>
-
             <button
-              onClick={() => {
-                resetForm();
-                setOpenAddPanel(true);
-              }}
+              onClick={() => { resetForm(); setOpenAddPanel(true); }}
               className="h-11 px-5 rounded-2xl bg-primary text-white text-sm font-semibold flex items-center gap-2 hover:opacity-90 transition shadow-md shadow-primary/25"
             >
               <Plus className="w-4 h-4" />
@@ -241,6 +353,7 @@ const fetchManagers = async () => {
             </button>
           </div>
 
+          {/* Search + Filter */}
           <div className="flex items-center gap-3 flex-wrap">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -252,9 +365,7 @@ const fetchManagers = async () => {
                 className="w-full h-10 pl-10 pr-4 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
               />
             </div>
-
-            {/* 👇 YAHAN SE 'Pending' HATA DIYA HAI */}
-            {["All", "Active", "Inactive"].map((s) => (
+            {["All", "Active", "Inactive", "Pending"].map((s) => (
               <button
                 key={s}
                 onClick={() => setFilter(s)}
@@ -269,77 +380,50 @@ const fetchManagers = async () => {
             ))}
           </div>
 
+          {/* Table */}
           <div className="bg-card rounded-xl border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-secondary/50">
-                  <th className="text-left py-4 px-5 font-medium text-muted-foreground">
-                    Project Name
-                  </th>
-                  <th className="text-left py-4 px-5 font-medium text-muted-foreground">
-                    Manager
-                  </th>
-                  <th className="text-left py-4 px-5 font-medium text-muted-foreground">
-                    Start date
-                  </th>
-                  <th className="text-left py-4 px-5 font-medium text-muted-foreground">
-                    Location
-                  </th>
-                  <th className="text-left py-4 px-5 font-medium text-muted-foreground">
-                    Budget
-                  </th>
-                  <th className="text-left py-4 px-5 font-medium text-muted-foreground">
-                    Status
-                  </th>
-                  <th className="text-right py-4 px-5 font-medium text-muted-foreground">
-                    Actions
-                  </th>
+                  {["Project Name","Manager","Start Date","Location","Budget","Status","Actions"].map((h, i) => (
+                    <th key={h} className={`py-4 px-5 font-medium text-muted-foreground ${i === 6 ? "text-right" : "text-left"}`}>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
-
               <tbody>
-                {filtered.map((project) => (
-                  <tr
-                    key={project.id}
-                    className="border-b border-border last:border-b-0 hover:bg-secondary/30 transition"
-                  >
-                    <td className="py-4 px-5 font-medium text-foreground">
-                      {project.name}
-                    </td>
-                    <td className="py-4 px-5 text-muted-foreground">
-                      {project.manager?.name || "-"}
-                    </td>
-                    <td className="py-4 px-5 text-muted-foreground">
-                      {project.start_date || "-"}
-                    </td>
-                    <td className="py-4 px-5 text-muted-foreground">
-                      {project.location}
-                    </td>
-                    <td className="py-4 px-5 font-medium text-foreground">
-                     {project.budget || "-"}
-                    </td>
-                    <td className="py-4 px-5">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          statusColors[project.status]
-                        }`}
-                      >
-                        {project.status ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td className="py-4 px-5">
-                      <div className="flex items-center justify-end gap-4">
-                        <button onClick={() => handleEditClick(project)} className="transition">
-                          <Pencil className="w-4 h-4 text-emerald-700" />
-                        </button>
-                        <button onClick={() => handleDeleteProject(project.id)} className="transition">
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-
+                {filtered.map((project) => {
+                  const statusLabel = displayStatus(project.status);
+                  return (
+                    <tr key={project.id} className="border-b border-border last:border-b-0 hover:bg-secondary/30 transition">
+                      <td className="py-4 px-5 font-medium text-foreground">{project.name}</td>
+                      <td className="py-4 px-5 text-muted-foreground">
+                        {project.manager?.name ?? project.manager ?? "-"}
+                      </td>
+                      <td className="py-4 px-5 text-muted-foreground">
+                        {project.start_date ?? project.startDate ?? "-"}
+                      </td>
+                      <td className="py-4 px-5 text-muted-foreground">{project.location ?? "-"}</td>
+                      <td className="py-4 px-5 font-medium text-foreground">{project.budget ?? "-"}</td>
+                      <td className="py-4 px-5">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[statusLabel] ?? "bg-gray-100 text-gray-600"}`}>
+                          {statusLabel}
+                        </span>
+                      </td>
+                      <td className="py-4 px-5">
+                        <div className="flex items-center justify-end gap-4">
+                          <button onClick={() => handleEditClick(project)}>
+                            <Pencil className="w-4 h-4 text-emerald-700" />
+                          </button>
+                          <button onClick={() => handleDeleteProject(project.id)}>
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {filtered.length === 0 && (
                   <tr>
                     <td colSpan="7" className="py-12 text-center text-muted-foreground">
@@ -353,207 +437,29 @@ const fetchManagers = async () => {
         </div>
       </AdminLayout>
 
-      {/* ====== ADD PROJECT PANEL ====== */}
+      {/* ADD PANEL */}
       <SlidePanel open={openAddPanel} onClose={() => setOpenAddPanel(false)}>
         <div className="h-full flex flex-col bg-card">
           <div className="flex items-center justify-between px-6 pt-8 pb-5">
             <h2 className="text-2xl font-heading font-bold text-foreground">Add Project</h2>
-            <button
-              onClick={() => setOpenAddPanel(false)}
-              className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-secondary transition"
-            >
+            <button onClick={() => setOpenAddPanel(false)} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-secondary transition">
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
-
-          <div className="px-6 space-y-4">
-            <input
-              type="text"
-              placeholder="Project Name"
-              value={form.name}
-              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-            />
-
-            <div className="relative">
-              <select
-  value={form.manager_id}
-  onChange={(e) =>
-    setForm((prev) => ({
-      ...prev,
-      manager_id: e.target.value,
-    }))
-  }
-  className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10"
->
-  <option value="">Select Manager</option>
-
-  {managers.map((m) => (
-    <option key={m.id} value={m.id}>
-      {m.name}
-    </option>
-  ))}
-</select>
-              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            </div>
-
-            <input
-              type="text"
-              placeholder="Location"
-              value={form.location}
-              onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
-              className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-            />
-
-            {/* 👇 EXTRA ICON REMOVED FROM ADD PANEL */}
-            <div className="relative">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Start date
-              </label>
-              <input
-                type="date"
-                value={form.startDate}
-                onChange={(e) => setForm((prev) => ({ ...prev, startDate: e.target.value }))}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground outline-none focus:ring-2 focus:ring-primary/30 dark:[color-scheme:dark]"
-              />
-            </div>
-
-            <input
-              type="text"
-              placeholder="Budget"
-              value={form.budget}
-              onChange={(e) => setForm((prev) => ({ ...prev, budget: e.target.value }))}
-              className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-            />
-
-            <div className="relative">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Status
-              </label>
-              <select
-                value={form.status}
-                onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground outline-none appearance-none focus:ring-2 focus:ring-primary/30"
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-                <option value="Pending">Pending</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            </div>
-
-            <button
-              onClick={handleAddProject}
-              className="w-full h-12 mt-4 rounded-2xl bg-primary text-white font-semibold shadow-md shadow-primary/25 hover:opacity-90 transition"
-            >
-              Add Project
-            </button>
-          </div>
+          <FormFields isEdit={false} />
         </div>
       </SlidePanel>
 
-      {/* ====== EDIT PROJECT PANEL ====== */}
+      {/* EDIT PANEL */}
       <SlidePanel open={openEditPanel} onClose={() => setOpenEditPanel(false)}>
         <div className="h-full flex flex-col bg-card">
           <div className="flex items-center justify-between px-6 pt-8 pb-5">
             <h2 className="text-2xl font-heading font-bold text-foreground">Edit Project</h2>
-            <button
-              onClick={() => setOpenEditPanel(false)}
-              className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-secondary transition"
-            >
+            <button onClick={() => setOpenEditPanel(false)} className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-secondary transition">
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
-
-          <div className="px-6 space-y-4">
-            <div className="relative">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Project Name
-              </label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </div>
-
-            <div className="relative">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Assign manager
-              </label>
-              <select
-                value={form.manager}
-                onChange={(e) => setForm((prev) => ({ ...prev, manager: e.target.value }))}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground outline-none appearance-none focus:ring-2 focus:ring-primary/30"
-              >
-                <option value="Site Manager">Site Manager</option>
-                <option value="Project Manager">Project Manager</option>
-                <option value="Supervisor">Supervisor</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            </div>
-
-            <div className="relative">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Location
-              </label>
-              <input
-                type="text"
-                value={form.location}
-                onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </div>
-
-            {/* 👇 EXTRA ICON REMOVED FROM EDIT PANEL */}
-            <div className="relative">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Start date
-              </label>
-              <input
-                type="date"
-                value={form.startDate}
-                onChange={(e) => setForm((prev) => ({ ...prev, startDate: e.target.value }))}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground outline-none focus:ring-2 focus:ring-primary/30 dark:[color-scheme:dark]"
-              />
-            </div>
-
-            <div className="relative">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Budget
-              </label>
-              <input
-                type="text"
-                value={form.budget}
-                onChange={(e) => setForm((prev) => ({ ...prev, budget: e.target.value }))}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </div>
-
-            <div className="relative">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Status
-              </label>
-              <select
-                value={form.status}
-                onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground outline-none appearance-none focus:ring-2 focus:ring-primary/30"
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-                <option value="Pending">Pending</option>
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            </div>
-
-            <button
-              onClick={handleUpdateProject}
-              className="w-full h-12 mt-4 rounded-2xl bg-primary text-white font-semibold shadow-md shadow-primary/25 hover:opacity-90 transition"
-            >
-              Update Project
-            </button>
-          </div>
+          <FormFields isEdit={true} />
         </div>
       </SlidePanel>
     </>

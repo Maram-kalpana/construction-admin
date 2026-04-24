@@ -114,10 +114,10 @@ const [totalPages, setTotalPages] = useState(1);
       const payload = {
   name: userForm.name,
   email: userForm.email,
-  phone: Number(userForm.phone),
+  phone: userForm.phone, // string ✅
   password: userForm.password || "123456",
-  role: userForm.role, // don't lowercase
-  status: userForm.status === "Active" ? 1 : 0,
+  role: userForm.role.toLowerCase(), // ✅
+  status: userForm.status === "Active" ? "1" : "0", // string ✅
 };
       await createUser(payload);
 

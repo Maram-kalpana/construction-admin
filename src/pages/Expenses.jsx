@@ -1,5 +1,5 @@
 // src/pages/Expenses.jsx
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect} from "react";
 import { motion } from "framer-motion";
 import {
   ChevronDown,
@@ -405,9 +405,7 @@ export default function Expenses() {
                       {col.label}
                     </th>
                   ))}
-                  <th className="text-right py-3.5 px-4 font-medium text-muted-foreground whitespace-nowrap">
-                    Actions
-                  </th>
+                  
                 </tr>
               </thead>
 
@@ -415,7 +413,7 @@ export default function Expenses() {
                 {filteredRows.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={columns.length + 1}
+                      colSpan={columns.length }
                       className="h-[220px] text-center align-middle text-muted-foreground"
                     >
                       No expense rows
@@ -447,11 +445,7 @@ export default function Expenses() {
                         </td>
                       ))}
 
-                      <td className="py-4 px-4 text-right">
-                        <button className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-secondary transition">
-                          <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                        </button>
-                      </td>
+                      
                     </motion.tr>
                   ))
                 )}

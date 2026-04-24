@@ -3,34 +3,10 @@ import { Eye, Pencil, Plus, Trash2, X, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
 
-const initialRows = [
-  {
-    id: 1,
-    name: "Rohit Sharma",
-    designation: "Site Manager",
-    mailId: "rohit.sharma@example.com",
-    amountAllocated: "45000",
-    project: "Project Alpha",
-    date: "2025-04-01",
-  },
-  {
-    id: 2,
-    name: "Priya Verma",
-    designation: "Accountant",
-    mailId: "priya.verma@example.com",
-    amountAllocated: "30000",
-    project: "Project Beta",
-    date: "2025-04-03",
-  },
-  {
-    id: 3,
-    name: "Amit Kumar",
-    designation: "Supervisor",
-    mailId: "amit.kumar@example.com",
-    amountAllocated: "25000",
-    project: "Project Gamma",
-    date: "2025-04-05",
-  },
+const usersData = [
+  { name: "Ravi Kumar", email: "ravi@gmail.com", role: "manager" },
+  { name: "Amit", email: "amit@gmail.com", role: "manager" },
+  { name: "Priya Verma", email: "priya@gmail.com", role: "accountant" },
 ];
 
 const emptyForm = {
@@ -131,7 +107,7 @@ export default function Accounts() {
 
   const handleSave = () => {
     if (!formData.name.trim()) return alert("Please enter name");
-    if (!formData.designation.trim()) return alert("Please enter designation");
+    if (!formData.designation) return alert("Please select designation");
     if (!formData.mailId.trim()) return alert("Please enter mail ID");
     if (!formData.amountAllocated.trim()) return alert("Please enter amount allocated");
     if (!formData.project.trim()) return alert("Please select project");
@@ -322,29 +298,61 @@ export default function Accounts() {
             </button>
           </div>
 
-          <input
-            type="text"
-            placeholder="Name"
-            value={formData.name}
-            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-            className="w-full h-11 rounded-2xl border border-border bg-background px-4"
-          />
+          {/* DESIGNATION */}
+<select
+  value={formData.designation}
+  onChange={(e) => {
+    setFormData((prev) => ({
+      ...prev,
+      designation: e.target.value,
+      mailId: "",
+      name: "",
+    }));
+  }}
+  className="w-full h-11 rounded-2xl border border-border bg-background px-4"
+>
+  <option value="">Select Designation</option>
+  <option value="manager">Manager</option>
+  <option value="accountant">Accountant</option>
+</select>
 
-          <input
-            type="text"
-            placeholder="Designation"
-            value={formData.designation}
-            onChange={(e) => setFormData((prev) => ({ ...prev, designation: e.target.value }))}
-            className="w-full h-11 rounded-2xl border border-border bg-background px-4"
-          />
+{/* MAIL ID */}
+<select
+  value={formData.mailId}
+  onChange={(e) => {
+    const selectedEmail = e.target.value;
 
-          <input
-            type="email"
-            placeholder="Mail ID"
-            value={formData.mailId}
-            onChange={(e) => setFormData((prev) => ({ ...prev, mailId: e.target.value }))}
-            className="w-full h-11 rounded-2xl border border-border bg-background px-4"
-          />
+    const selectedUser = usersData.find(
+      (u) => u.email === selectedEmail
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      mailId: selectedEmail,
+      name: selectedUser?.name || "",
+    }));
+  }}
+  disabled={!formData.designation}
+  className="w-full h-11 rounded-2xl border border-border bg-background px-4"
+>
+  <option value="">Select Mail ID</option>
+  {usersData
+    .filter((u) => u.role === formData.designation)
+    .map((user) => (
+      <option key={user.email} value={user.email}>
+        {user.email} ({user.name})
+      </option>
+    ))}
+</select>
+
+{/* NAME (AUTO FILLED) */}
+<input
+  type="text"
+  value={formData.name}
+  readOnly
+  placeholder="Name"
+  className="w-full h-11 rounded-2xl border border-border bg-gray-100 px-4"
+/>
 
           <div className="relative">
             <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
