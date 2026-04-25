@@ -131,7 +131,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       ],
     },
     {
-      label: "Account",
+      label: " Admin Account",
       icon: UserCircle,
       items: [
         { label: "Profile", icon: UserCircle, path: "/dashboard/profile" },

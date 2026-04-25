@@ -12,6 +12,8 @@ import {
   Check,
 } from "lucide-react";
 import AdminLayout from "../components/AdminLayout";
+import { getReports } from "../api/reportApi";
+import { getProjects } from "../api/projectApi";
 
 const defaultColumns = [
   { key: "date", label: "Date", visible: true },
@@ -35,9 +37,9 @@ const dummyLabourData = [
 ];
 
 export default function Labour() {
-  const [projects, setProjects] = useState(dummyProjects);
-  const [rows, setRows] = useState(dummyLabourData);
-  const [project, setProject] = useState("Project Alpha");
+  
+  const [rows, setRows] = useState([]);
+  const [project, setProject] = useState("");
   const [date, setDate] = useState("");
   const [columns, setColumns] = useState(defaultColumns);
 
@@ -52,82 +54,61 @@ export default function Labour() {
 
   const headerMenuRef = useRef(null);
   const manageColumnsRef = useRef(null);
+  const [projects, setProjects] = useState([]);
 
   useEffect(() => {
-    try {
-      const storedProjects = JSON.parse(localStorage.getItem("projectsData")) || [];
-      const storedRows = JSON.parse(localStorage.getItem("labourData")) || [];
+  fetchProjects();
+  fetchReports();
+}, []);
 
-      const finalProjects = storedProjects.length > 0 ? storedProjects : dummyProjects;
-      const finalRows = storedRows.length > 0 ? storedRows : dummyLabourData;
+const fetchProjects = async () => {
+  try {
+    const res = await getProjects();
 
-      setProjects(finalProjects);
-      setRows(finalRows);
+    console.log("ADMIN PROJECTS:", res.data);
+    console.log("REPORTS RAW:", res);
+console.log("REPORTS DATA:", res.data);
 
-      const firstProjectName = finalProjects[0]?.name || finalProjects[0]?.projectName || "Project Alpha";
-      setProject(firstProjectName);
-    } catch (error) {
-      console.error("Error loading data", error);
-    }
-  }, []);
+    const data = Array.isArray(res.data?.data)
+  ? res.data.data
+  : Array.isArray(res.data)
+  ? res.data
+  : [];
 
-  useEffect(() => {
-    if (rows !== dummyLabourData) {
-      localStorage.setItem("labourData", JSON.stringify(rows));
-    }
-  }, [rows]);
+    setProjects(data);
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (headerMenuRef.current && !headerMenuRef.current.contains(event.target)) {
-        setHeaderMenuOpen(false);
-      }
-      if (manageColumnsRef.current && !manageColumnsRef.current.contains(event.target)) {
-        setShowManageColumns(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  } catch (err) {
+    console.log("Project fetch error:", err);
+  }
+};
 
-  const filteredRows = useMemo(() => {
-    let data = rows.filter((row) => {
-      const rowProject = row.project || row.projectName || "";
-      const rowDate = row.date || "";
-      return (project ? rowProject === project : true) && (date ? rowDate === date : true);
-    });
 
-    if (showFilterRow && filterState.value.trim()) {
-      data = data.filter((row) => {
-        const rowValue = String(row[filterState.column] ?? "").toLowerCase();
-        const filterValue = filterState.value.toLowerCase();
+const fetchReports = async () => {
+  try {
+    const res = await getReports();
 
-        switch (filterState.operator) {
-          case "contains": return rowValue.includes(filterValue);
-          case "does not contain": return !rowValue.includes(filterValue);
-          case "equals": return rowValue === filterValue;
-          case "does not equal": return rowValue !== filterValue;
-          case "starts with": return rowValue.startsWith(filterValue);
-          case "ends with": return rowValue.endsWith(filterValue);
-          case "is empty": return rowValue.trim() === "";
-          case "is not empty": return rowValue.trim() !== "";
-          default: return true;
-        }
-      });
-    }
+    console.log("REPORTS:", res.data);
 
-    if (sortConfig.key && sortConfig.direction) {
-      data = [...data].sort((a, b) => {
-        const aVal = String(a[sortConfig.key] ?? "").toLowerCase();
-        const bVal = String(b[sortConfig.key] ?? "").toLowerCase();
-        if (sortConfig.direction === "asc") return aVal.localeCompare(bVal);
-        return bVal.localeCompare(aVal);
-      });
-    }
+    const data = res?.data?.data || [];
+ 
+    // 🔥 MAP API → TABLE FORMAT
+    const formatted = data.map((item) => ({
+  id: item.id,
+  date: item.date,
+  party: item.vendor_id,
+  m: item.mason,
+  f: item.female_unskilled,
+  workDone: item.work_done,
+  measurements: "-",
+}));
 
-    return data;
-  }, [rows, project, date, showFilterRow, filterState, sortConfig]);
+    setRows(formatted);
 
+  } catch (err) {
+    console.log("Error fetching reports:", err);
+  }
+};
+  const filteredRows = rows;
   const visibleColumns = columns.filter((col) => col.visible);
 
   const searchedColumns = columns.filter((col) =>
@@ -171,10 +152,10 @@ export default function Labour() {
                 onChange={(e) => setProject(e.target.value)}
                 className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground outline-none appearance-none focus:ring-2 focus:ring-primary/30"
               >
-                {projects.map((item, index) => (
-                  <option key={index} value={item.name || item.projectName}>
-                    {item.name || item.projectName}
-                  </option>
+                {projects.map((item) => (
+                  <option key={item.id} value={item.id}>
+  {item.name || item.projectName}
+</option>
                 ))}
               </select>
               <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
