@@ -32,7 +32,7 @@ const defaultColumnsMap = {
     { key: "f", label: "F", visible: true },
     { key: "work", label: "Work", visible: true },
     { key: "meas", label: "Meas.", visible: true },
-    { key: "actions", label: "Actions", visible: true },
+    
   ],
   Machinery: [
     { key: "date", label: "Date", visible: true },
@@ -59,7 +59,7 @@ const defaultColumnsMap = {
     { key: "redbrk", label: "Red brk", visible: true },
     { key: "rr", label: "RR", visible: true },
     { key: "other", label: "Other", visible: true },
-    { key: "actions", label: "Actions", visible: true },
+    
   ],
   Stock: [
     { key: "date", label: "Date", visible: true },
@@ -69,19 +69,19 @@ const defaultColumnsMap = {
     { key: "in", label: "In", visible: true },
     { key: "out", label: "Out", visible: true },
     { key: "close", label: "Close", visible: true },
-    { key: "actions", label: "Actions", visible: true },
+ 
   ],
   Details: [
     { key: "date", label: "Date", visible: true },
     { key: "manager", label: "Manager", visible: true },
     { key: "description", label: "Description", visible: true },
-    { key: "actions", label: "Actions", visible: true },
+    
   ],
   Vendors: [
     { key: "name", label: "Name", visible: true },
     { key: "type", label: "Type", visible: true },
     { key: "contact", label: "Contact", visible: true },
-    { key: "notes", label: "Notes", visible: true },
+    
   ],
 };
 

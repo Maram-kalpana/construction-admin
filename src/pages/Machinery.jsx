@@ -278,8 +278,7 @@ export default function Machinery() {
         </div>
 
         <div className="bg-card rounded-[28px] border border-border overflow-visible relative">
-          <div
-            className="overflow-x-auto"
+          <div className="overflow-x-auto w-full"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -293,7 +292,7 @@ export default function Machinery() {
               `}
             </style>
 
-            <table className="machinery-scroll-hidden w-max min-w-full text-sm">
+            <table className="machinery-scroll-hidden w-full table-fixed text-sm">
               <thead>
                 <tr className="border-b border-border bg-card">
                   {visibleColumns.map((col) => {
@@ -303,9 +302,9 @@ export default function Machinery() {
 
                     return (
                       <th
-                        key={col.key}
-                        className="text-left py-4 px-4 font-semibold text-foreground relative whitespace-nowrap"
-                      >
+  key={col.key}
+  className="py-4 px-4 font-semibold text-foreground whitespace-nowrap w-[150px]"
+>
                         <div
                           className="flex items-center gap-2"
                           ref={selectedColumnKey === col.key ? headerMenuRef : null}
@@ -508,7 +507,7 @@ export default function Machinery() {
                   filteredRows.map((row) => (
                     <tr key={row.id} className="border-b border-border last:border-0 hover:bg-secondary/20 transition">
                       {visibleColumns.map((col) => (
-                        <td key={col.key} className="py-4 px-4 text-foreground whitespace-nowrap">
+                        <td key={col.key} className="py-4 px-4 text-foreground whitespace-nowrap w-[150px]">
                           {row[col.key]}
                         </td>
                       ))}
