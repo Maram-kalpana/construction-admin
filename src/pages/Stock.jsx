@@ -83,6 +83,8 @@ export default function Stock() {
   const [showFilterRow, setShowFilterRow] = useState(false);
   const [showManageColumns, setShowManageColumns] = useState(false);
   const [manageSearch, setManageSearch] = useState("");
+  const [project, setProject] = useState("");
+  const projects = ["Project Alpha", "Project Beta", "Project Gamma"];
 
   const [sortConfig, setSortConfig] = useState({
     key: "",
@@ -206,152 +208,77 @@ export default function Stock() {
 
         <div className="rounded-[28px] border border-border bg-card p-4 md:p-5 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="relative min-w-[220px]">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Date
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </div>
 
-            <button
-              type="button"
-              onClick={() => setDate("")}
-              className="text-sm font-semibold text-foreground hover:text-primary transition self-start sm:self-center"
-            >
-              Clear
-            </button>
-          </div>
-        </div>
+  {/* PROJECT DROPDOWN */}
+  <div className="relative min-w-[220px]">
+    <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
+      Project
+    </label>
+
+    <select
+      value={project}
+      onChange={(e) => setProject(e.target.value)}
+      className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 appearance-none text-foreground"
+    >
+      <option value="">Select Project</option>
+      {projects.map((p) => (
+        <option key={p} value={p}>
+          {p}
+        </option>
+      ))}
+    </select>
+
+    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+  </div>
+
+  {/* DATE */}
+  <div className="relative min-w-[220px]">
+    <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
+      Date
+    </label>
+    <input
+      type="date"
+      value={date}
+      onChange={(e) => setDate(e.target.value)}
+      className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+    />
+  </div>
+
+  {/* CLEAR */}
+  <button
+    type="button"
+    onClick={() => {
+      setDate("");
+      setProject("");
+    }}
+    className="text-sm font-semibold text-foreground hover:text-primary transition self-start sm:self-center"
+  >
+    Clear
+  </button>
+
+</div>
+ </div>           
+
+           
 
         <div className="rounded-[28px] border border-border bg-card shadow-sm overflow-visible relative min-h-[420px]">
           <div className="overflow-x-auto rounded-[28px]">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-card">
-                  {visibleColumns.map((col) => {
-                    const isSorted = sortConfig.key === col.key;
-                    const isAsc = isSorted && sortConfig.direction === "asc";
-                    const isDesc = isSorted && sortConfig.direction === "desc";
-
-                    return (
-                      <th
-                        key={col.key}
-                        className="text-left py-4 px-4 font-medium text-foreground relative whitespace-nowrap"
-                      >
-                        <div
-                          className="flex items-center gap-2"
-                          ref={selectedColumnKey === col.key ? headerMenuRef : null}
-                        >
-                          <span className="whitespace-nowrap">{col.label}</span>
-
-                          {isAsc && <ArrowUp className="w-4 h-4 text-primary" />}
-                          {isDesc && <ArrowDown className="w-4 h-4 text-primary" />}
-
-                          {!isSorted && (
-                            <span className="flex items-center gap-0.5">
-                              <ArrowUp className="w-3.5 h-3.5 text-muted-foreground/70" />
-                              <ArrowDown className="w-3.5 h-3.5 text-muted-foreground/70 -ml-1" />
-                            </span>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => openColumnMenu(col.key)}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-secondary transition"
-                          >
-                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                          </button>
-
-                          {headerMenuOpen && selectedColumnKey === col.key && (
-                            <div className="absolute top-full left-0 mt-2 w-[275px] rounded-2xl border border-border bg-card shadow-xl z-50 overflow-hidden">
-                              <button
-                                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                                onClick={() => {
-                                  setSortConfig({ key: col.key, direction: "asc" });
-                                  setHeaderMenuOpen(false);
-                                }}
-                              >
-                                <ArrowUp className="w-4 h-4 text-muted-foreground" />
-                                <span>Sort by ASC</span>
-                              </button>
-
-                              <button
-                                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                                onClick={() => {
-                                  setSortConfig({ key: col.key, direction: "desc" });
-                                  setHeaderMenuOpen(false);
-                                }}
-                              >
-                                <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                                <span>Sort by DESC</span>
-                              </button>
-
-                              <button
-                                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                                onClick={() => {
-                                  setSortConfig({ key: "", direction: "" });
-                                  setHeaderMenuOpen(false);
-                                }}
-                              >
-                                <span className="w-4 h-4" />
-                                <span>Unsort</span>
-                              </button>
-
-                              <div className="border-t border-border" />
-
-                              <button
-                                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                                onClick={() => {
-                                  setFilterState((prev) => ({ ...prev, column: col.key }));
-                                  setShowFilterRow(true);
-                                  setHeaderMenuOpen(false);
-                                }}
-                              >
-                                <Filter className="w-4 h-4 text-muted-foreground" />
-                                <span>Filter</span>
-                              </button>
-
-                              <div className="border-t border-border" />
-
-                              <button
-                                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                                onClick={() => {
-                                  toggleColumn(col.key);
-                                  setHeaderMenuOpen(false);
-                                }}
-                              >
-                                <EyeOff className="w-4 h-4 text-muted-foreground" />
-                                <span>Hide column</span>
-                              </button>
-
-                              <button
-                                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                                onClick={() => {
-                                  setShowManageColumns(true);
-                                  setHeaderMenuOpen(false);
-                                }}
-                              >
-                                <Columns3 className="w-4 h-4 text-muted-foreground" />
-                                <span>Manage columns</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
+            <table className="w-full text-sm border border-gray-300 border-collapse">
+              <thead className="bg-gray-50">
+  <tr>
+    <th className="border border-gray-300 px-4 py-4 text-left font-semibold">Date</th>
+    <th className="border border-gray-300 px-4 py-4 text-left font-semibold">Item</th>
+    <th className="border border-gray-300 px-4 py-4 text-left font-semibold">Opening</th>
+    <th className="border border-gray-300 px-4 py-4 text-left font-semibold">In</th>
+    <th className="border border-gray-300 px-4 py-4 text-left font-semibold">Out</th>
+    <th className="border border-gray-300 px-4 py-4 text-left font-semibold">Closing</th>
+  </tr>
+</thead>
 
               <tbody>
                 {showFilterRow && (
                   <tr className="border-b border-border">
-                    <td colSpan={visibleColumns.length} className="p-4">
+                  <td className="border border-border px-4 py-3">
                       <div className="max-w-[660px] rounded-2xl bg-card shadow-xl border border-border p-5 flex items-center gap-4">
                         <button
                           type="button"
@@ -435,23 +362,23 @@ export default function Stock() {
                 {filteredRows.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={visibleColumns.length}
-                      className="h-[320px] text-center align-middle text-foreground"
-                    >
-                      No rows
-                    </td>
+  key={col.key}
+  className="border border-gray-300 px-4 py-3 text-foreground whitespace-nowrap"
+>
+  {row[col.key]}
+</td>
                   </tr>
                 ) : (
                   filteredRows.map((row) => (
-                    <tr key={row.id} className="border-b border-border last:border-0">
+                    <tr key={row.id}>
                       {visibleColumns.map((col) => (
-                        <td
-                          key={col.key}
-                          className="py-4 px-4 text-foreground whitespace-nowrap"
-                        >
-                          {row[col.key]}
-                        </td>
-                      ))}
+  <td
+    key={col.key}
+    className="border border-gray-300 px-4 py-3 text-foreground whitespace-nowrap"
+  >
+    {row[col.key]}
+  </td>
+))}
                     </tr>
                   ))
                 )}

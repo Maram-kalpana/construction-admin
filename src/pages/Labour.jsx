@@ -176,7 +176,7 @@ const fetchReports = async () => {
         {/* NICHE WALA BOX (Now with perfect rounded corners like the top box) */}
         <div className="bg-card rounded-[28px] border border-border shadow-sm overflow-hidden relative">
           <div className={`overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${isAnyMenuOpen ? 'min-h-[480px]' : ''}`}>
-            <table className="w-max min-w-full text-sm">
+            <table className="w-full text-sm border border-border border-collapse">
               <thead>
                 <tr className="border-b border-border bg-card">
                   {visibleColumns.map((col) => {
@@ -185,53 +185,9 @@ const fetchReports = async () => {
                     const isDesc = isSorted && sortConfig.direction === "desc";
 
                     return (
-                      <th key={col.key} className="text-left py-4 px-4 font-semibold text-foreground relative whitespace-nowrap">
-                        <div className="flex items-center gap-2" ref={selectedColumnKey === col.key ? headerMenuRef : null}>
-                          <span className="whitespace-nowrap">{col.label}</span>
-
-                          {isAsc && <ArrowUp className="w-4 h-4 text-primary" />}
-                          {isDesc && <ArrowDown className="w-4 h-4 text-primary" />}
-                          {!isSorted && (
-                            <span className="flex items-center gap-0.5">
-                              <ArrowUp className="w-3.5 h-3.5 text-muted-foreground/70" />
-                              <ArrowDown className="w-3.5 h-3.5 text-muted-foreground/70 -ml-1" />
-                            </span>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => openColumnMenu(col.key)}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-secondary transition"
-                          >
-                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                          </button>
-
-                          {headerMenuOpen && selectedColumnKey === col.key && (
-                            <div className="absolute top-full left-0 mt-2 w-[275px] rounded-2xl border border-border bg-card shadow-xl z-30 overflow-hidden">
-                              <button className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition" onClick={() => { setSortConfig({ key: col.key, direction: "asc" }); setHeaderMenuOpen(false); }}>
-                                <ArrowUp className="w-4 h-4 text-muted-foreground" /> <span>Sort by ASC</span>
-                              </button>
-                              <button className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition" onClick={() => { setSortConfig({ key: col.key, direction: "desc" }); setHeaderMenuOpen(false); }}>
-                                <ArrowDown className="w-4 h-4 text-muted-foreground" /> <span>Sort by DESC</span>
-                              </button>
-                              <button className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition" onClick={() => { setSortConfig({ key: "", direction: "" }); setHeaderMenuOpen(false); }}>
-                                <span className="w-4 h-4" /> <span>Unsort</span>
-                              </button>
-                              <div className="border-t border-border" />
-                              <button className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition" onClick={() => { setFilterState((prev) => ({ ...prev, column: col.key })); setShowFilterRow(true); setHeaderMenuOpen(false); }}>
-                                <Filter className="w-4 h-4 text-muted-foreground" /> <span>Filter</span>
-                              </button>
-                              <div className="border-t border-border" />
-                              <button className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition" onClick={() => { toggleColumn(col.key); setHeaderMenuOpen(false); }}>
-                                <EyeOff className="w-4 h-4 text-muted-foreground" /> <span>Hide column</span>
-                              </button>
-                              <button className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition" onClick={() => { setShowManageColumns(true); setHeaderMenuOpen(false); }}>
-                                <Columns3 className="w-4 h-4 text-muted-foreground" /> <span>Manage columns</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </th>
+                    <th className="border border-border px-4 py-4 text-left font-semibold whitespace-nowrap">
+  {col.label}
+</th>
                     );
                   })}
                 </tr>
@@ -239,7 +195,7 @@ const fetchReports = async () => {
               <tbody>
                 {showFilterRow && (
                   <tr className="border-b border-border">
-                    <td colSpan={visibleColumns.length} className="p-4">
+                    <td className="border border-border px-4 py-3 whitespace-nowrap">
                       <div className="max-w-[660px] rounded-2xl bg-card shadow-xl border border-border p-5 flex items-center gap-4">
                         <button type="button" onClick={() => setShowFilterRow(false)} className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-secondary transition">
                           <X className="w-5 h-5 text-muted-foreground" />

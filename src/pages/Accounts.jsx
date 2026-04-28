@@ -38,8 +38,7 @@ const getProjectsFromStorage = () => {
 export default function Accounts() {
   const navigate = useNavigate();
 
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [rows, setRows] = useState(() => {
     const saved = localStorage.getItem("accountsData");
     return saved ? JSON.parse(saved) : initialRows;
@@ -63,12 +62,10 @@ export default function Accounts() {
   }, [rows]);
 
   const filteredRows = useMemo(() => {
-    return rows.filter((row) => {
-      const fromMatch = fromDate ? row.date >= fromDate : true;
-      const toMatch = toDate ? row.date <= toDate : true;
-      return fromMatch && toMatch;
-    });
-  }, [rows, fromDate, toDate]);
+  return rows.filter((row) => {
+    return selectedDate ? row.date === selectedDate : true;
+  });
+}, [rows, selectedDate]);
 
   const totalAllocated = rows.reduce(
     (sum, row) => sum + Number(row.amountAllocated || 0),
@@ -169,115 +166,136 @@ export default function Accounts() {
             </button>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="relative max-w-sm w-full">
-              <label className="absolute left-4 -top-2.5 bg-background px-1 text-xs text-muted-foreground">
-                From
-              </label>
-              <input
-                type="date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                className="w-full h-10 px-4 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
-              />
-            </div>
+         <div className="flex items-center gap-6 flex-wrap">
 
-            <div className="relative max-w-sm w-full">
-              <label className="absolute left-4 -top-2.5 bg-background px-1 text-xs text-muted-foreground">
-                To
-              </label>
-              <input
-                type="date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                className="w-full h-10 px-4 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
-              />
-            </div>
+  {/* DATE + CLEAR GROUP */}
+  <div className="flex items-center gap-3">
 
-            <button
-              type="button"
-              onClick={() => {
-                setFromDate("");
-                setToDate("");
-              }}
-              className="text-sm font-medium text-foreground hover:text-primary transition"
-            >
-              Clear dates
-            </button>
-          </div>
+    <div className="relative w-[220px]">
+      <label className="absolute left-4 -top-2.5 bg-background px-1 text-xs text-muted-foreground">
+        Date
+      </label>
+
+      <input
+        type="date"
+        value={selectedDate}
+        onChange={(e) => setSelectedDate(e.target.value)}
+        className="w-full h-10 px-4 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
+      />
+    </div>
+
+    <button
+      type="button"
+      onClick={() => setSelectedDate("")}
+      className="text-sm font-medium text-foreground hover:text-primary transition"
+    >
+      Clear
+    </button>
+
+  </div>
+
+</div>
 
           <div className="text-sm font-medium text-foreground">
             Current Balance: ₹{totalAllocated.toLocaleString()}
           </div>
 
           <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-secondary/50">
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Name</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Designation</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Mail ID</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Project</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Amount Allocated</th>
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">Action</th>
-                </tr>
-              </thead>
+  <table className="w-full text-sm border-collapse">
 
-              <tbody>
-                {filteredRows.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="h-[220px] text-center align-middle text-muted-foreground">
-                      No rows
-                    </td>
-                  </tr>
-                ) : (
-                  filteredRows.map((row) => (
-                    <tr
-                      key={row.id}
-                      className="border-b border-border last:border-0 hover:bg-secondary/30 transition"
-                    >
-                      <td className="py-3 px-4 font-medium text-foreground whitespace-nowrap">{row.name}</td>
-                      <td className="py-3 px-4 text-muted-foreground whitespace-nowrap">{row.designation}</td>
-                      <td className="py-3 px-4 text-muted-foreground whitespace-nowrap">{row.mailId}</td>
-                      <td className="py-3 px-4 text-muted-foreground whitespace-nowrap">{row.project || "-"}</td>
-                      <td className="py-3 px-4 text-foreground whitespace-nowrap">
-                        ₹{Number(row.amountAllocated).toLocaleString()}
-                      </td>
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <button
-                            type="button"
-                            onClick={() => handleView(row)}
-                            className="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-600 hover:bg-green-200 transition inline-flex items-center gap-1"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            View
-                          </button>
+    {/* HEADER */}
+    <thead>
+      <tr className="bg-secondary/50">
+        <th className="text-left py-3 px-4 border-b border-border border-r border-border">
+          Name
+        </th>
 
-                          <button
-                            type="button"
-                            onClick={() => openEditDrawer(row)}
-                            className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-600 hover:bg-amber-200 transition inline-flex items-center gap-1"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                            Edit
-                          </button>
+        <th className="text-left py-3 px-4 border-b border-border border-r border-border">
+          Designation
+        </th>
 
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(row.id)}
-                            className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500 hover:bg-slate-200 transition inline-flex items-center gap-1"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+        <th className="text-left py-3 px-4 border-b border-border border-r border-border">
+          Mail ID
+        </th>
+
+        <th className="text-left py-3 px-4 border-b border-border border-r border-border">
+          Project
+        </th>
+
+        <th className="text-left py-3 px-4 border-b border-border border-r border-border">
+          Amount Allocated
+        </th>
+
+        <th className="text-left py-3 px-4 border-b border-border">
+          Action
+        </th>
+      </tr>
+    </thead>
+
+    {/* BODY */}
+    <tbody>
+      {filteredRows.length === 0 ? (
+        <tr>
+          <td colSpan="6" className="h-[220px] text-center align-middle text-muted-foreground border-b border-border">
+            No rows
+          </td>
+        </tr>
+      ) : (
+        filteredRows.map((row) => (
+          <tr key={row.id}>
+            
+            <td className="py-3 px-4 border-b border-border border-r border-border whitespace-nowrap">
+              {row.name}
+            </td>
+
+            <td className="py-3 px-4 border-b border-border border-r border-border whitespace-nowrap">
+              {row.designation}
+            </td>
+
+            <td className="py-3 px-4 border-b border-border border-r border-border whitespace-nowrap">
+              {row.mailId}
+            </td>
+
+            <td className="py-3 px-4 border-b border-border border-r border-border whitespace-nowrap">
+              {row.project || "-"}
+            </td>
+
+            <td className="py-3 px-4 border-b border-border border-r border-border whitespace-nowrap">
+              ₹{Number(row.amountAllocated).toLocaleString()}
+            </td>
+
+            <td className="py-3 px-4 border-b border-border whitespace-nowrap">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={() => handleView(row)}
+                  className="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-600"
+                >
+                  View
+                </button>
+
+                <button
+                  onClick={() => openEditDrawer(row)}
+                  className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-600"
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => handleDelete(row.id)}
+                  className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+
+          </tr>
+        ))
+      )}
+    </tbody>
+
+  </table>
+
           </div>
         </div>
       </AdminLayout>

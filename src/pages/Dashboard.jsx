@@ -203,13 +203,14 @@ export default function Dashboard() {
 
   return (
     <AdminLayout>
+      <div className="w-full max-w-[1400px] mx-auto px-2 sm:px-0">
       <div className="space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <p className="text-sm md:text-[15px] leading-6 text-gray-500 dark:text-gray-400">
             Track your business performance.
           </p>
 
-          <div className="relative min-w-[240px]" ref={dropdownRef}>
+          <div className="relative w-full sm:w-[260px]" ref={dropdownRef}>
             <button
               onClick={() => {
                 if (!isDropdownOpen) {
@@ -263,7 +264,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-5"></div><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {statsConfig.map((stat) => {
             const Icon = stat.icon;
 
@@ -276,7 +277,7 @@ export default function Dashboard() {
                 whileHover={{ y: -4, scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate(stat.path)}
-                className={`rounded-xl p-5 cursor-pointer transition shadow-sm border border-transparent dark:border-white/5 ${stat.bgClass}`}
+                className={`rounded-xl p-5 cursor-pointer transition shadow-sm border border-transparent dark:border-white/5 ${stat.bgClass}`}className={`rounded-xl p-4 sm:p-5 cursor-pointer transition shadow-sm border border-transparent dark:border-white/5 ${stat.bgClass}`}
               >
                 <div className="flex items-center justify-between mb-4">
                    <div className="w-10 h-10 rounded-full bg-white dark:bg-transparent flex items-center justify-center shadow-sm dark:shadow-none">
@@ -285,7 +286,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <p className="text-2xl font-heading font-bold text-gray-900 dark:text-white">
+                  <p className="text-xl sm:text-2xl font-heading font-bold text-gray-900 dark:text-white">
                     {counts[stat.key]}
                   </p>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -344,6 +345,7 @@ export default function Dashboard() {
             </div>
           </motion.div>
         </div>
+      </div>
       </div>
     </AdminLayout>
   );

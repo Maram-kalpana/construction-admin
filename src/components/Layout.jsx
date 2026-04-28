@@ -9,13 +9,7 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen bg-background text-foreground transition-colors duration-300">
-      <div
-        style={{
-          width: sidebarOpen ? "280px" : "84px",
-          transition: "width 0.3s ease",
-          flexShrink: 0,
-        }}
-      >
+      <div className="flex-shrink-0">
         <Sidebar
           collapsed={!sidebarOpen}
           setCollapsed={(value) => setSidebarOpen(!value)}

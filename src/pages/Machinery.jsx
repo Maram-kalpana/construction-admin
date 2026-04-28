@@ -241,7 +241,7 @@ export default function Machinery() {
         </p>
 
         <div className="rounded-[28px] border border-border bg-card p-4 md:p-5 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+         <div className="flex items-center gap-2">
             <div className="relative min-w-[220px]">
               <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
                 Project
@@ -291,231 +291,61 @@ export default function Machinery() {
                 }
               `}
             </style>
+<table className="w-full table-fixed border border-gray-300 border-collapse text-sm">
 
-            <table className="machinery-scroll-hidden w-full table-fixed text-sm">
-              <thead>
-                <tr className="border-b border-border bg-card">
-                  {visibleColumns.map((col) => {
-                    const isSorted = sortConfig.key === col.key;
-                    const isAsc = isSorted && sortConfig.direction === "asc";
-                    const isDesc = isSorted && sortConfig.direction === "desc";
+  {/* ✅ PERFECT COLUMN CONTROL */}
+  <colgroup>
+    <col style={{ width: "140px" }} />
+    <col style={{ width: "180px" }} />
+    <col style={{ width: "120px" }} />
+    <col style={{ width: "120px" }} />
+    <col style={{ width: "70px" }} />
+    <col style={{ width: "120px" }} />
+    <col style={{ width: "200px" }} />
+    <col style={{ width: "140px" }} />
+  </colgroup>
 
-                    return (
-                      <th
+  <thead>
+    <tr className="hover:bg-secondary/20 transition">
+      {visibleColumns.map((col) => {
+        const isSorted = sortConfig.key === col.key;
+        const isAsc = isSorted && sortConfig.direction === "asc";
+        const isDesc = isSorted && sortConfig.direction === "desc";
+
+        return (
+         <th
   key={col.key}
-  className="py-4 px-4 font-semibold text-foreground whitespace-nowrap w-[150px]"
+  className="border border-gray-300 px-4 py-3 font-semibold text-foreground whitespace-nowrap bg-gray-50"
 >
-                        <div
-                          className="flex items-center gap-2"
-                          ref={selectedColumnKey === col.key ? headerMenuRef : null}
-                        >
-                          <span className="whitespace-nowrap">{col.label}</span>
+  <div className="flex items-center">
+    {col.label}
+  </div>
+</th>
+        );
+      })}
+    </tr>
+  </thead>
 
-                          {isAsc && <ArrowUp className="w-4 h-4 text-primary" />}
-                          {isDesc && <ArrowDown className="w-4 h-4 text-primary" />}
+  <tbody>
+    {filteredRows.map((row) => (
+      <tr key={row.id} className="border-b border-border last:border-0 hover:bg-secondary/20 transition">
+        {visibleColumns.map((col) => (
+          <td
+            key={col.key}
+           className={`border border-gray-300 px-4 py-3 whitespace-nowrap ${
+  col.key === "hrs" || col.key === "submitted"
+    ? "text-center"
+    : "text-left"
+}`}
+          >
+            {row[col.key]}
+          </td>
+        ))}
+      </tr>
+    ))}
+  </tbody>
 
-                          {!isSorted && (
-                            <span className="flex items-center gap-0.5">
-                              <ArrowUp className="w-3.5 h-3.5 text-muted-foreground/70" />
-                              <ArrowDown className="w-3.5 h-3.5 text-muted-foreground/70 -ml-1" />
-                            </span>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => openColumnMenu(col.key)}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-secondary transition"
-                          >
-                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                          </button>
-
-                          {headerMenuOpen && selectedColumnKey === col.key && (
-                            <div className="absolute top-full left-0 mt-2 w-[275px] rounded-2xl border border-border bg-card shadow-xl z-30 overflow-hidden">
-                              <button
-                                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                                onClick={() => {
-                                  setSortConfig({ key: col.key, direction: "asc" });
-                                  setHeaderMenuOpen(false);
-                                }}
-                              >
-                                <ArrowUp className="w-4 h-4 text-muted-foreground" />
-                                <span>Sort by ASC</span>
-                              </button>
-
-                              <button
-                                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                                onClick={() => {
-                                  setSortConfig({ key: col.key, direction: "desc" });
-                                  setHeaderMenuOpen(false);
-                                }}
-                              >
-                                <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                                <span>Sort by DESC</span>
-                              </button>
-
-                              <button
-                                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                                onClick={() => {
-                                  setSortConfig({ key: "", direction: "" });
-                                  setHeaderMenuOpen(false);
-                                }}
-                              >
-                                <span className="w-4 h-4" />
-                                <span>Unsort</span>
-                              </button>
-
-                              <div className="border-t border-border" />
-
-                              <button
-                                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                                onClick={() => {
-                                  setFilterState((prev) => ({ ...prev, column: col.key }));
-                                  setShowFilterRow(true);
-                                  setHeaderMenuOpen(false);
-                                }}
-                              >
-                                <Filter className="w-4 h-4 text-muted-foreground" />
-                                <span>Filter</span>
-                              </button>
-
-                              <div className="border-t border-border" />
-
-                              <button
-                                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                                onClick={() => {
-                                  toggleColumn(col.key);
-                                  setHeaderMenuOpen(false);
-                                }}
-                              >
-                                <EyeOff className="w-4 h-4 text-muted-foreground" />
-                                <span>Hide column</span>
-                              </button>
-
-                              <button
-                                className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                                onClick={() => {
-                                  setShowManageColumns(true);
-                                  setHeaderMenuOpen(false);
-                                }}
-                              >
-                                <Columns3 className="w-4 h-4 text-muted-foreground" />
-                                <span>Manage columns</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
-
-              <tbody>
-                {showFilterRow && (
-                  <tr className="border-b border-border">
-                    <td colSpan={visibleColumns.length} className="p-4">
-                      <div className="max-w-[660px] rounded-2xl bg-card shadow-xl border border-border p-5 flex items-center gap-4">
-                        <button
-                          type="button"
-                          onClick={() => setShowFilterRow(false)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-secondary transition"
-                        >
-                          <X className="w-5 h-5 text-muted-foreground" />
-                        </button>
-
-                        <div className="relative min-w-[170px]">
-                          <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                            Columns
-                          </label>
-                          <select
-                            value={filterState.column}
-                            onChange={(e) =>
-                              setFilterState((prev) => ({
-                                ...prev,
-                                column: e.target.value,
-                              }))
-                            }
-                            className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 appearance-none"
-                          >
-                            {columns.map((col) => (
-                              <option key={col.key} value={col.key}>
-                                {col.label}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        </div>
-
-                        <div className="relative min-w-[170px]">
-                          <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                            Operator
-                          </label>
-                          <select
-                            value={filterState.operator}
-                            onChange={(e) =>
-                              setFilterState((prev) => ({
-                                ...prev,
-                                operator: e.target.value,
-                              }))
-                            }
-                            className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 appearance-none"
-                          >
-                            <option value="contains">contains</option>
-                            <option value="does not contain">does not contain</option>
-                            <option value="equals">equals</option>
-                            <option value="does not equal">does not equal</option>
-                            <option value="starts with">starts with</option>
-                            <option value="ends with">ends with</option>
-                            <option value="is empty">is empty</option>
-                            <option value="is not empty">is not empty</option>
-                          </select>
-                          <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        </div>
-
-                        <div className="relative flex-1 min-w-[210px]">
-                          <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                            Value
-                          </label>
-                          <input
-                            type="text"
-                            value={filterState.value}
-                            onChange={(e) =>
-                              setFilterState((prev) => ({
-                                ...prev,
-                                value: e.target.value,
-                              }))
-                            }
-                            placeholder="Filter value"
-                            className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-                          />
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-
-                {filteredRows.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={visibleColumns.length}
-                      className="h-[420px] text-center align-middle text-foreground"
-                    >
-                      No rows found for this project
-                    </td>
-                  </tr>
-                ) : (
-                  filteredRows.map((row) => (
-                    <tr key={row.id} className="border-b border-border last:border-0 hover:bg-secondary/20 transition">
-                      {visibleColumns.map((col) => (
-                        <td key={col.key} className="py-4 px-4 text-foreground whitespace-nowrap w-[150px]">
-                          {row[col.key]}
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+</table>
           </div>
 
           {showManageColumns && (

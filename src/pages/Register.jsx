@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Eye, EyeOff, UserPlus, Building2 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/logo.png";
 
 export default function Register() {
   const { register } = useAuth();
@@ -18,8 +19,6 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log("FORM SUBMITTED 🔥", form);
 
     if (!form.name || !form.email || !form.phone || !form.password) {
       alert("All fields required ❗");
@@ -38,75 +37,115 @@ export default function Register() {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-5xl bg-white rounded-[32px] shadow-2xl flex overflow-hidden min-h-[600px] border">
+    <div className="fixed inset-0 bg-slate-50 flex items-center justify-center p-4 sm:p-8 overflow-y-auto">
+      
+      <div className="w-full max-w-5xl bg-white rounded-[32px] shadow-2xl flex overflow-hidden min-h-[600px] border border-slate-200">
 
-        {/* LEFT */}
+        {/* LEFT PANEL */}
         <div className="hidden lg:flex w-1/2 bg-slate-900 p-12 flex-col justify-center">
-          <div>
-            <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center">
-              <Building2 className="text-white" />
+
+          {/* LOGO + TEXT */}
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg p-2">
+              <img src={logo} alt="logo" className="w-full h-full object-contain" />
             </div>
-            <h1 className="text-white text-3xl mt-6 font-bold">
-              Create Admin Account
-            </h1>
+
+            <div>
+              <h1 className="text-2xl xl:text-3xl font-bold text-white leading-tight">
+                Sruthika Constructions
+              </h1>
+              <p className="text-sm text-slate-300">Build Smarter</p>
+            </div>
           </div>
+
+          <h2 className="text-white text-3xl mt-10 font-bold">
+            Create Admin Account
+          </h2>
+
         </div>
 
-        {/* RIGHT */}
-        <div className="w-full lg:w-1/2 p-10">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        {/* RIGHT PANEL */}
+        <div className="w-full lg:w-1/2 p-6 sm:p-10 flex items-center justify-center bg-white">
+          
+          <div className="w-full max-w-md">
 
-            <input
-              placeholder="Name"
-              onChange={(e) =>
-                setForm({ ...form, name: e.target.value })
-              }
-              className="w-full h-12 border rounded px-4"
-            />
+            {/* MOBILE LOGO */}
+            <div className="lg:hidden mb-8 flex items-center justify-center gap-3">
+              <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg p-2">
+                <img src={logo} alt="logo" className="w-full h-full object-contain" />
+              </div>
 
-            <input
-              placeholder="Email"
-              onChange={(e) =>
-                setForm({ ...form, email: e.target.value })
-              }
-              className="w-full h-12 border rounded px-4"
-            />
-
-            <input
-              placeholder="Phone"
-              onChange={(e) =>
-                setForm({ ...form, phone: e.target.value })
-              }
-              className="w-full h-12 border rounded px-4"
-            />
-
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                onChange={(e) =>
-                  setForm({ ...form, password: e.target.value })
-                }
-                className="w-full h-12 border rounded px-4"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-3"
-              >
-                {showPassword ? <EyeOff /> : <Eye />}
-              </button>
+              <div>
+                <h1 className="text-lg font-bold text-slate-900">
+                  Sruthika Constructions
+                </h1>
+                <p className="text-xs text-slate-500">Build Smarter</p>
+              </div>
             </div>
 
-            <button
-              type="submit"
-              className="w-full h-12 bg-blue-600 text-white rounded"
-            >
-              Register
-            </button>
+            <form onSubmit={handleSubmit} className="space-y-5">
 
-          </form>
+              <input
+                placeholder="Name"
+                onChange={(e) =>
+                  setForm({ ...form, name: e.target.value })
+                }
+                className="w-full h-12 rounded-xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
+              />
+
+              <input
+                placeholder="Email"
+                onChange={(e) =>
+                  setForm({ ...form, email: e.target.value })
+                }
+                className="w-full h-12 rounded-xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
+              />
+
+              <input
+                placeholder="Phone"
+                onChange={(e) =>
+                  setForm({ ...form, phone: e.target.value })
+                }
+                className="w-full h-12 rounded-xl border border-slate-200 px-4 outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
+              />
+
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                  className="w-full h-12 rounded-xl border border-slate-200 px-4 pr-12 outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full h-12 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+              >
+                Register
+              </button>
+
+              <p className="text-sm text-center text-slate-500">
+                Already have an account?{" "}
+                <span
+                  className="text-blue-600 cursor-pointer"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </span>
+              </p>
+
+            </form>
+          </div>
         </div>
       </div>
     </div>

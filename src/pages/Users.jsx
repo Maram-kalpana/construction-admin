@@ -234,54 +234,55 @@ const [totalPages, setTotalPages] = useState(1);
 
           {/* TABLE */}
           <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-secondary/50">
-                  <th className="text-left py-3 px-4">Name</th>
-                  <th className="text-left py-3 px-4">Email</th>
-                  <th className="text-left py-3 px-4">Phone</th>
-                  <th className="text-left py-3 px-4">Role</th>
-                  <th className="text-left py-3 px-4">Project</th>
-                  <th className="text-left py-3 px-4">Username</th>
-                  <th className="text-left py-3 px-4">Status</th>
-                  <th className="text-right py-3 px-4">Actions</th>
-                </tr>
-              </thead>
+            <table className="w-full text-sm border-collapse">
+  <thead>
+    <tr className="bg-secondary/50">
+      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Name</th>
+      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Email</th>
+      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Phone</th>
+      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Role</th>
+      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Project</th>
+      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Username</th>
+      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Status</th>
+      <th className="text-right py-3 px-4 border-b border-border">Actions</th>
+    </tr>
+  </thead>
 
-              <tbody>
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-b">
-                    <td className="py-3 px-4">{user.name}</td>
-                    <td className="py-3 px-4">{user.email}</td>
-                    <td className="py-3 px-4">{user.phone || "-"}</td>
-                    <td className="py-3 px-4">{user.role}</td>
-                    <td className="py-3 px-4">
-                      {user.project || "N/A"}
-                    </td>
-                    <td className="py-3 px-4">{user.username}</td>
-                    <td className="py-3 px-4">
-                      {user.status ? "Active" : "Inactive"}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <button onClick={() => handleEditUserClick(user)}>
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleDeleteUser(user.id)}>
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+  <tbody>
+    {filteredUsers.map((user) => (
+      <tr key={user.id}>
+        <td className="py-3 px-4 border-b border-border border-r border-border">{user.name}</td>
+        <td className="py-3 px-4 border-b border-border border-r border-border">{user.email}</td>
+        <td className="py-3 px-4 border-b border-border border-r border-border">{user.phone || "-"}</td>
+        <td className="py-3 px-4 border-b border-border border-r border-border">{user.role}</td>
+        <td className="py-3 px-4 border-b border-border border-r border-border">{user.project || "N/A"}</td>
+        <td className="py-3 px-4 border-b border-border border-r border-border">{user.username}</td>
+        <td className="py-3 px-4 border-b border-border border-r border-border">
+          {user.status ? "Active" : "Inactive"}
+        </td>
 
-                {filteredUsers.length === 0 && (
-                  <tr>
-                    <td colSpan="8" className="text-center py-10">
-                      No users found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        <td className="py-3 px-4 border-b border-border text-right">
+          <div className="flex justify-end gap-3">
+            <button onClick={() => handleEditUserClick(user)}>
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button onClick={() => handleDeleteUser(user.id)}>
+              <Trash2 className="w-4 h-4 text-red-500" />
+            </button>
+          </div>
+        </td>
+      </tr>
+    ))}
+
+    {filteredUsers.length === 0 && (
+      <tr>
+        <td colSpan="8" className="text-center py-10 border-b border-border">
+          No users found.
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
           </div>
           <div className="flex justify-between items-center mt-4 px-4">
   <button

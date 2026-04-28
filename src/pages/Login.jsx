@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Eye, EyeOff, LogIn, Building2, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-
+import logo from "../assets/logo.png";
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -39,13 +39,17 @@ export default function Login() {
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-600/20 to-transparent pointer-events-none"></div>
           
           <div className="relative z-10">
-            <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
-              <Building2 className="w-7 h-7 text-white" />
-            </div>
+            <div className="flex items-center gap-4">
+  <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg p-2">
+    <img src={logo} alt="logo" className="w-full h-full object-contain" />
+  </div>
 
-            <h1 className="mt-8 text-3xl xl:text-4xl font-heading font-bold text-white tracking-tight">
-              SR
-            </h1>
+  <div>
+    <h1 className="text-2xl xl:text-3xl font-bold text-white leading-tight">
+      Sruthika Constructions
+    </h1>
+  </div>
+</div>
             <p className="mt-4 text-sm leading-relaxed text-slate-300 max-w-md">
               Manage projects, reports, materials, machinery, labour and stock
               from one premium dashboard experience built for smooth daily operations.
@@ -93,14 +97,18 @@ export default function Login() {
         <div className="w-full lg:w-1/2 p-8 sm:p-12 lg:p-16 flex items-center justify-center bg-white">
           <div className="w-full max-w-md">
             
-            <div className="lg:hidden mb-10 text-center flex flex-col items-center">
-              <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
-                <Building2 className="w-7 h-7 text-white" />
-              </div>
-              <h1 className="mt-5 text-2xl font-heading font-bold text-slate-900 tracking-tight">
-                Construction ERP
-              </h1>
-            </div>
+            <div className="flex items-center justify-center gap-3">
+  <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg p-2">
+    <img src={logo} alt="logo" className="w-full h-full object-contain" />
+  </div>
+
+  <div className="text-left">
+    <h1 className="text-lg font-bold text-slate-900 leading-tight">
+      Sruthika Constructions
+    </h1>
+  
+  </div>
+</div>
 
             <div className="mb-10 text-left">
               <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider">Welcome back</p>

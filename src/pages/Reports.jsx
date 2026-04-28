@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import AdminLayout from "../components/AdminLayout";
 
-const tabs = ["Labour", "Machinery", "Materials", "Stock", "Details", "Vendors"];
+const tabs = ["Labour", "Machinery", "Materials", "Stock","Managers", "Vendors"];
 
 const vendorsRows = [
   { id: 1, name: "ABC Labour Contractors", type: "labour", contact: "9000000001", notes: "" },
@@ -44,7 +44,7 @@ const defaultColumnsMap = {
     { key: "submitted", label: "Submitted", visible: true },
     { key: "work", label: "Work", visible: true },
     { key: "meas", label: "Meas.", visible: true },
-    { key: "actions", label: "Actions", visible: true },
+    
   ],
   Materials: [
     { key: "date", label: "Date", visible: true },
@@ -58,7 +58,7 @@ const defaultColumnsMap = {
     { key: "flyash", label: "Fly ash", visible: true },
     { key: "redbrk", label: "Red brk", visible: true },
     { key: "rr", label: "RR", visible: true },
-    { key: "other", label: "Other", visible: true },
+  
     
   ],
   Stock: [
@@ -71,7 +71,7 @@ const defaultColumnsMap = {
     { key: "close", label: "Close", visible: true },
  
   ],
-  Details: [
+  Managers: [
     { key: "date", label: "Date", visible: true },
     { key: "manager", label: "Manager", visible: true },
     { key: "description", label: "Description", visible: true },
@@ -114,7 +114,7 @@ const initialRowsMap = {
     { id: 4, project: "Project Alpha", date: "2025-04-13", manager: "Rohit Sharma", item: "Sand", open: 300, in: 100, out: 80, close: 320, actions: "-" },
     { id: 5, project: "Project Gamma", date: "2025-04-14", manager: "Amit Kumar", item: "Gravel", open: 220, in: 60, out: 40, close: 240, actions: "-" },
   ],
-  Details: [
+  Managers: [
     { id: 1, project: "Project Alpha", date: "2025-04-10", manager: "Rohit Sharma", description: "Daily site progress reviewed and approved.", actions: "-" },
     { id: 2, project: "Project Beta", date: "2025-04-11", manager: "Priya Verma", description: "Material delay reported by supplier.", actions: "-" },
     { id: 3, project: "Project Gamma", date: "2025-04-12", manager: "Amit Kumar", description: "Machinery breakdown resolved by noon.", actions: "-" },
@@ -131,7 +131,7 @@ const createColumnsState = () => ({
   Machinery: cloneColumns("Machinery"),
   Materials: cloneColumns("Materials"),
   Stock: cloneColumns("Stock"),
-  Details: cloneColumns("Details"),
+  Managers: cloneColumns("Managers"),
   Vendors: cloneColumns("Vendors"),
 });
 
@@ -140,7 +140,7 @@ const createSortState = () => ({
   Machinery: { key: "", direction: "" },
   Materials: { key: "", direction: "" },
   Stock: { key: "", direction: "" },
-  Details: { key: "", direction: "" },
+  Managers: { key: "", direction: "" },
   Vendors: { key: "", direction: "" },
 });
 
@@ -149,7 +149,7 @@ const createFilterState = () => ({
   Machinery: { column: "date", operator: "contains", value: "" },
   Materials: { column: "date", operator: "contains", value: "" },
   Stock: { column: "date", operator: "contains", value: "" },
-  Details: { column: "date", operator: "contains", value: "" },
+  Managers: { column: "date", operator: "contains", value: "" },
   Vendors: { column: "name", operator: "contains", value: "" },
 });
 
@@ -158,7 +158,7 @@ const createShowFilterRows = () => ({
   Machinery: false,
   Materials: false,
   Stock: false,
-  Details: false,
+  Managers: false,
   Vendors: false,
 });
 
@@ -167,7 +167,7 @@ const createManageSearchState = () => ({
   Machinery: "",
   Materials: "",
   Stock: "",
-  Details: "",
+  Managers: "",
   Vendors: "",
 });
 
@@ -192,7 +192,7 @@ export default function Reports() {
   });
 
   const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  
   const [activeTab, setActiveTab] = useState("Labour");
 
   const [columnsByTab, setColumnsByTab] = useState(createColumnsState);
@@ -250,8 +250,7 @@ export default function Reports() {
         // 👇 Agar 'project' khali hai ("All Projects"), toh true return karega
         const projectMatch = project ? row.project === project : true;
         const fromMatch = fromDate ? row.date >= fromDate : true;
-        const toMatch = toDate ? row.date <= toDate : true;
-        return projectMatch && fromMatch && toMatch;
+        return projectMatch && fromMatch;
       });
     }
 
@@ -296,7 +295,7 @@ export default function Reports() {
     }
 
     return data;
-  }, [rows, isVendorsTab, project, fromDate, toDate, showFilterRow, filterState, sortConfig]);
+  }, [rows, isVendorsTab, project, fromDate, showFilterRow, filterState, sortConfig]);
 
   const toggleColumn = (key) => {
     setColumnsByTab((prev) => ({
@@ -356,9 +355,9 @@ export default function Reports() {
   const renderTable = () => {
     return (
       <div className={`overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${headerMenuOpen ? 'min-h-[350px]' : ''}`}>
-        <table className="w-max min-w-full text-sm">
+       <table className="w-full border border-gray-300 border-collapse text-sm">
           <thead>
-            <tr className="border-b border-border bg-card">
+            <tr className="bg-card">
               {visibleColumns.map((col) => {
                 const isSorted = sortConfig.key === col.key;
                 const isAsc = isSorted && sortConfig.direction === "asc";
@@ -366,125 +365,15 @@ export default function Reports() {
 
                 return (
                   <th
-                    key={col.key}
-                    className="text-left py-4 px-4 font-semibold text-foreground relative whitespace-nowrap"
-                  >
-                    <div
-                      className="flex items-center gap-2"
-                      ref={!isVendorsTab && selectedColumnKey === col.key ? headerMenuRef : null}
-                    >
-                      <span className="whitespace-nowrap">{col.label}</span>
-
-                      {!isVendorsTab && (
-                        <>
-                          {isAsc && <ArrowUp className="w-4 h-4 text-primary" />}
-                          {isDesc && <ArrowDown className="w-4 h-4 text-primary" />}
-
-                          {!isSorted && (
-                            <span className="flex items-center gap-0.5">
-                              <ArrowUp className="w-3.5 h-3.5 text-muted-foreground/70" />
-                              <ArrowDown className="w-3.5 h-3.5 text-muted-foreground/70 -ml-1" />
-                            </span>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => openColumnMenu(col.key)}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-secondary transition"
-                          >
-                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                          </button>
-                        </>
-                      )}
-
-                      {!isVendorsTab && headerMenuOpen && selectedColumnKey === col.key && (
-                        <div className="absolute top-full left-0 mt-2 w-[275px] rounded-2xl border border-border bg-card shadow-xl z-30 overflow-hidden">
-                          <button
-                            className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                            onClick={() => {
-                              setSortByTab((prev) => ({
-                                ...prev,
-                                [activeTab]: { key: col.key, direction: "asc" },
-                              }));
-                              setHeaderMenuOpen(false);
-                            }}
-                          >
-                            <ArrowUp className="w-4 h-4 text-muted-foreground" />
-                            <span>Sort by ASC</span>
-                          </button>
-
-                          <button
-                            className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                            onClick={() => {
-                              setSortByTab((prev) => ({
-                                ...prev,
-                                [activeTab]: { key: col.key, direction: "desc" },
-                              }));
-                              setHeaderMenuOpen(false);
-                            }}
-                          >
-                            <ArrowDown className="w-4 h-4 text-muted-foreground" />
-                            <span>Sort by DESC</span>
-                          </button>
-
-                          <button
-                            className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                            onClick={() => {
-                              setSortByTab((prev) => ({
-                                ...prev,
-                                [activeTab]: { key: "", direction: "" },
-                              }));
-                              setHeaderMenuOpen(false);
-                            }}
-                          >
-                            <span className="w-4 h-4" />
-                            <span>Unsort</span>
-                          </button>
-
-                          <div className="border-t border-border" />
-
-                          <button
-                            className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                            onClick={() => {
-                              updateFilterState("column", col.key);
-                              setShowFilterRowByTab((prev) => ({
-                                ...prev,
-                                [activeTab]: true,
-                              }));
-                              setHeaderMenuOpen(false);
-                            }}
-                          >
-                            <Filter className="w-4 h-4 text-muted-foreground" />
-                            <span>Filter</span>
-                          </button>
-
-                          <div className="border-t border-border" />
-
-                          <button
-                            className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                            onClick={() => {
-                              toggleColumn(col.key);
-                              setHeaderMenuOpen(false);
-                            }}
-                          >
-                            <EyeOff className="w-4 h-4 text-muted-foreground" />
-                            <span>Hide column</span>
-                          </button>
-
-                          <button
-                            className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-secondary transition"
-                            onClick={() => {
-                              setShowManageColumns(true);
-                              setHeaderMenuOpen(false);
-                            }}
-                          >
-                            <Columns3 className="w-4 h-4 text-muted-foreground" />
-                            <span>Manage columns</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </th>
+  key={col.key}
+  className={`border border-gray-300 px-4 py-3 font-semibold bg-gray-50 whitespace-nowrap
+    ${col.key === "date" ? "w-[120px]" : ""}
+    ${col.key === "manager" ? "w-[180px]" : ""}
+    ${col.key === "supplier" ? "w-[200px]" : ""}
+  `}
+>
+  {col.label}
+</th>
                 );
               })}
             </tr>
@@ -493,7 +382,7 @@ export default function Reports() {
           <tbody>
             {!isVendorsTab && showFilterRow && (
               <tr className="border-b border-border">
-                <td colSpan={visibleColumns.length} className="p-4">
+                <td key={col.key} className="border border-gray-300 px-4 py-3 whitespace-nowrap">
                   <div className="max-w-[660px] rounded-2xl bg-card shadow-xl border border-border p-5 flex items-center gap-4">
                     <button
                       type="button"
@@ -539,7 +428,7 @@ export default function Reports() {
                         <option value="does not contain">does not contain</option>
                         <option value="equals">equals</option>
                         <option value="does not equal">does not equal</option>
-                        <option value="starts with">starts with</option>
+                        <option vlue="starts with">starts with</option>
                         <option value="ends with">ends with</option>
                         <option value="is empty">is empty</option>
                         <option value="is not empty">is not empty</option>
@@ -555,7 +444,7 @@ export default function Reports() {
                         type="text"
                         value={filterState.value}
                         onChange={(e) => updateFilterState("value", e.target.value)}
-                        placeholder="Filter value"
+                        placeholdera="Filter value"
                         className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
                       />
                     </div>
@@ -566,11 +455,14 @@ export default function Reports() {
 
             {filteredRows.length > 0 ? (
               filteredRows.map((row) => (
-                <tr key={row.id} className="border-b border-border last:border-0 hover:bg-secondary/20 transition">
+                <tr key={row.id}>
                   {visibleColumns.map((col) => (
-                    <td key={col.key} className="py-4 px-4 text-foreground whitespace-nowrap">
-                      {row[col.key]}
-                    </td>
+      <td
+  key={col.key}
+  className="border border-gray-300 px-4 py-3 whitespace-nowrap overflow-hidden text-ellipsis"
+>
+  {row[col.key]}
+</td>
                   ))}
                 </tr>
               ))
@@ -594,86 +486,72 @@ export default function Reports() {
           Filter manager submissions by project and date. Edit or delete rows as needed.
         </p>
 
-        <div className="rounded-[28px] border border-border bg-card p-4 md:p-5 shadow-sm">
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            <div className="relative min-w-[240px]">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Project
-              </label>
-              {/* 👇 DYNAMIC DROPDOWN HERE */}
-              <select
-                value={project}
-                onChange={(e) => setProject(e.target.value)}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground outline-none appearance-none focus:ring-2 focus:ring-primary/30"
-              >
-                <option value="">All Projects</option>
-                {projectList.map((p) => (
-                  <option key={p.id} value={p.name}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            </div>
+        
+<div className="rounded-[28px] border border-border bg-card p-4 md:p-5 shadow-sm">
+  <div className="flex flex-col lg:flex-row lg:items-center gap-4">
 
-            <div className="relative min-w-[185px]">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                From
-              </label>
-              <input
-                type="date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground outline-none focus:ring-2 focus:ring-primary/30 dark:[color-scheme:dark]"
-              />
-            </div>
+    {/* Project */}
+    <div className="relative min-w-[240px]">
+      <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
+        Project
+      </label>
+      <select
+        value={project}
+        onChange={(e) => setProject(e.target.value)}
+        className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10"
+      >
+        <option value="">All Projects</option>
+        {projectList.map((p) => (
+          <option key={p.id} value={p.name}>
+            {p.name}
+          </option>
+        ))}
+      </select>
+    </div>
 
-            <div className="relative min-w-[185px]">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                To
-              </label>
-              <input
-                type="date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground outline-none focus:ring-2 focus:ring-primary/30 dark:[color-scheme:dark]"
-              />
-            </div>
+    {/* Date + Clear */}
+    <div className="flex items-center gap-3">
+      <div className="relative min-w-[185px]">
+        <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
+          Date
+        </label>
+        <input
+          type="date"
+          value={fromDate}
+          onChange={(e) => setFromDate(e.target.value)}
+          className="w-full h-11 rounded-2xl border border-border bg-background px-4"
+        />
+      </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                setFromDate("");
-                setToDate("");
-              }}
-              className="text-sm font-semibold text-foreground hover:text-primary transition self-start lg:self-center"
-            >
-              Clear dates
-            </button>
-          </div>
-        </div>
+      <button
+        type="button"
+        onClick={() => setFromDate("")}
+        className="text-sm font-semibold text-foreground hover:text-primary"
+      >
+        Clear
+      </button>
+    </div>
+
+  </div>
+</div>
 
         <div className="bg-card rounded-[28px] border border-border overflow-visible relative">
           <div className="border-b border-border px-4">
-            <div className="flex flex-wrap items-center gap-8">
-              {tabs.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    setActiveTab(tab);
-                    setHeaderMenuOpen(false);
-                    setShowManageColumns(false);
-                  }}
-                  className={`py-4 text-sm font-semibold border-b-2 transition ${
-                    activeTab === tab
-                      ? "text-foreground border-primary"
-                      : "text-muted-foreground border-transparent"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+            <div className="flex w-full border-b border-border">
+  {tabs.map((tab) => (
+    <button
+  key={tab}
+  onClick={() => setActiveTab(tab)}
+  className={`flex-1 text-center py-3 text-sm font-semibold border-b-2 transition ${
+    activeTab === tab
+      ? "text-foreground border-primary"
+      : "text-muted-foreground border-transparent"
+  }`}
+>
+  {tab}
+</button>
+  ))}
+</div>
           </div>
 
           <div className="p-4">

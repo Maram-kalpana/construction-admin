@@ -127,7 +127,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         { label: "Materials", icon: BrickWall, path: "/dashboard/materials" },
         { label: "Machinery", icon: Wrench, path: "/dashboard/machinery" },
         { label: "Reports", icon: FileBarChart2, path: "/dashboard/reports" },
-        { label: "Daily Report", icon: Calendar, path: "/dashboard/daily-report" },
+        // { label: "Daily Report", icon: Calendar, path: "/dashboard/daily-report" },
       ],
     },
     {
@@ -157,10 +157,10 @@ export default function Sidebar({ collapsed, setCollapsed }) {
   return (
     <aside
       className={`sticky top-0 h-screen flex flex-col bg-[#252b36] border-r border-[#343c46] transition-all duration-300 ${
-        collapsed ? "w-[72px]" : "w-[276px]"
+        collapsed ? "w-[60px]" : "w-[240px]"
       }`}
     >
-      <div className="h-16 flex items-center px-5 border-b border-[#343c46] gap-3">
+      <div className="h-14 flex items-center px-4 border-b border-[#343c46] gap-2">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-violet-500 flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/30">
           <Zap className="w-4 h-4 text-white" />
         </div>

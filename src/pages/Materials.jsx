@@ -126,7 +126,7 @@ export default function Materials() {
                   <th colSpan="2" className="px-4 py-4 border">BRICKS</th>
 
                   <th rowSpan="2" className="px-4 py-4 border">RR Stone (m³)</th>
-                  <th rowSpan="2" className="px-4 py-4 border">Others</th>
+                  
                 </tr>
 
                 <tr className="bg-secondary/15">
@@ -141,7 +141,7 @@ export default function Materials() {
               <tbody>
                 {filteredRows.length === 0 ? (
                   <tr>
-                    <td colSpan="12" className="text-center py-10">
+                    <td colSpan="11" className="text-center py-10">
                       No data found
                     </td>
                   </tr>
@@ -159,7 +159,7 @@ export default function Materials() {
                       <td className="border px-4 py-3">{row.flyAsh}</td>
                       <td className="border px-4 py-3">{row.redBrick}</td>
                       <td className="border px-4 py-3">{row.rrStone}</td>
-                      <td className="border px-4 py-3">{row.others}</td>
+                      
                     </tr>
                   ))
                 )}
