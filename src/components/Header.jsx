@@ -103,19 +103,19 @@ export default function Header({ onToggleSidebar }) {
     <>
       <header className="sticky top-0 z-30 h-16 border-b border-border bg-card flex items-center justify-between px-6 transition-colors duration-300">
         
-        <div className="flex items-center gap-4 flex-1 min-w-0">
+        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
           <button
-            onClick={onToggleSidebar}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition shrink-0"
-          >
+  onClick={onToggleSidebar}
+  className="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-secondary hover:text-foreground transition shrink-0"
+>
             <Menu className="w-5 h-5" />
           </button>
 
-          <h1 className="text-[20px] font-bold text-foreground whitespace-nowrap shrink-0 capitalize">
+          <h1 className="text-[16px] sm:text-[20px] font-bold text-foreground truncate capitalize">
             {location.pathname.split("/").pop()?.replace("-", " ") || "Dashboard"}
           </h1>
 
-          <div className="relative w-full max-w-[320px] hidden md:block" ref={searchRef}>
+          <div className="relative w-full max-w-[220px] sm:max-w-[320px] hidden md:block">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
@@ -158,7 +158,7 @@ export default function Header({ onToggleSidebar }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 ml-4">
+        <div className="flex items-center gap-2 sm:gap-3 ml-2 sm:ml-4">
           {/* 👇 Yahan se Site Desk ka code hata diya gaya hai */}
 
           <button

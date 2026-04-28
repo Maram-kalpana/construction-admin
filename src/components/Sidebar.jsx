@@ -11,7 +11,6 @@ import {
   Wrench,
   Truck,
   FileBarChart2,
-  Calendar,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -30,26 +29,27 @@ function SidebarGroup({ group, collapsed, isOpen, onToggle }) {
   );
 
   return (
-    <div className="mb-1">
+    <div className="mb-2">
+      {/* Group Header */}
       {!collapsed ? (
         <button
           onClick={onToggle}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all duration-200 ${
+          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition ${
             hasActiveChild
               ? "text-white bg-white/10"
               : "text-slate-400 hover:text-white hover:bg-white/5"
           }`}
         >
-          <group.icon className="w-4 h-4 shrink-0" />
+          <group.icon className="w-4 h-4" />
           <span className="flex-1 text-left">{group.label}</span>
           <ChevronDown
-            className={`w-3.5 h-3.5 transition-transform duration-200 ${
+            className={`w-3.5 h-3.5 transition ${
               isOpen ? "rotate-180" : ""
             }`}
           />
         </button>
       ) : (
-        <div className="flex justify-center py-2">
+        <div className="flex justify-center py-3">
           <div
             className={`w-6 h-0.5 rounded-full ${
               hasActiveChild ? "bg-blue-500" : "bg-slate-700"
@@ -58,48 +58,49 @@ function SidebarGroup({ group, collapsed, isOpen, onToggle }) {
         </div>
       )}
 
+      {/* Items */}
       {(isOpen || collapsed) && (
-        <div className="overflow-hidden">
-          <div
-            className={`space-y-0.5 ${
-              !collapsed ? "mt-1 ml-3 pl-3 border-l border-slate-700/60" : "mt-1"
-            }`}
-          >
-            {group.items.map((item) => {
-              const isActive = location.pathname === item.path;
+        <div
+          className={`space-y-1 ${
+            !collapsed ? "mt-2 ml-3 pl-3 border-l border-slate-700/60" : ""
+          }`}
+        >
+          {group.items.map((item) => {
+            const isActive = location.pathname === item.path;
 
-              return (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    collapsed ? "justify-center" : ""
-                  } ${
-                    isActive
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
-                      : "text-slate-200 hover:bg-slate-800 hover:text-white"
-                  }`}
-                >
-                  <item.icon className="w-[18px] h-[18px] shrink-0" />
-                  {!collapsed && <span>{item.label}</span>}
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  collapsed ? "justify-center px-0" : ""
+                } ${
+                  isActive
+                    ? "bg-blue-600 text-white"
+                    : "text-slate-200 hover:bg-slate-800"
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                {!collapsed && <span>{item.label}</span>}
 
-                  {collapsed && (
-                    <div className="absolute left-full ml-3 px-2.5 py-1.5 rounded-md bg-slate-900 text-white text-xs font-medium whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-lg pointer-events-none">
-                      {item.label}
-                    </div>
-                  )}
-                </NavLink>
-              );
-            })}
-          </div>
+                {/* Tooltip */}
+                {collapsed && (
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">
+                    {item.label}
+                  </div>
+                )}
+              </NavLink>
+            );
+          })}
         </div>
       )}
     </div>
   );
 }
 
-export default function Sidebar({ collapsed, setCollapsed }) {
+export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
 
   const navGroups = [
     {
@@ -122,16 +123,14 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       icon: Cog,
       items: [
         { label: "Labour", icon: HardHat, path: "/dashboard/labour" },
-        // { label: "Vendors", icon: Truck, path: "/dashboard/vendors" },
         { label: "Stock", icon: Boxes, path: "/dashboard/stock" },
         { label: "Materials", icon: BrickWall, path: "/dashboard/materials" },
         { label: "Machinery", icon: Wrench, path: "/dashboard/machinery" },
         { label: "Reports", icon: FileBarChart2, path: "/dashboard/reports" },
-        // { label: "Daily Report", icon: Calendar, path: "/dashboard/daily-report" },
       ],
     },
     {
-      label: " Admin Account",
+      label: "Admin Account",
       icon: UserCircle,
       items: [
         { label: "Profile", icon: UserCircle, path: "/dashboard/profile" },
@@ -155,64 +154,78 @@ export default function Sidebar({ collapsed, setCollapsed }) {
   };
 
   return (
-    <aside
-      className={`sticky top-0 h-screen flex flex-col bg-[#252b36] border-r border-[#343c46] transition-all duration-300 ${
-        collapsed ? "w-[60px]" : "w-[240px]"
-      }`}
-    >
-      <div className="h-14 flex items-center px-4 border-b border-[#343c46] gap-2">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-violet-500 flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/30">
-          <Zap className="w-4 h-4 text-white" />
-        </div>
-
-        {!collapsed && (
-          <span className="font-heading font-bold text-[18px] text-white tracking-tight">
-            SR
-          </span>
-        )}
-      </div>
-
-      {/* Yaha par humne scrollbar ko hide karne ke liye Tailwind Arbitrary classes use ki hain */}
-      <nav className="flex-1 py-4 px-3 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        {navGroups.map((group) => (
-          <SidebarGroup
-            key={group.label}
-            group={group}
-            collapsed={collapsed}
-            isOpen={openGroups[group.label] ?? false}
-            onToggle={() => toggleGroup(group.label)}
-          />
-        ))}
-      </nav>
-
-      {!collapsed && (
-        <div className="mx-3 mb-2 p-3 rounded-xl bg-white/5 border border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-violet-500 flex items-center justify-center text-white font-semibold text-sm">
-              JD
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white truncate">John Doe</p>
-              <p className="text-xs text-slate-400 truncate capitalize">Admin</p>
-            </div>
-            <UserCircle className="w-4 h-4 text-slate-400" />
-          </div>
-        </div>
+    <>
+      {/* Overlay (Mobile) */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          onClick={onClose}
+        />
       )}
 
-      <div className="py-1.5 border-t border-[#343c46] flex justify-center">
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
-          title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-        >
-          {collapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
+      {/* Sidebar */}
+      <aside
+        className={`
+          fixed top-0 left-0 z-50 h-full bg-[#252b36] border-r border-[#343c46]
+          transform transition-transform duration-300
+          ${collapsed ? "w-[80px]" : "w-[240px]"}
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          lg:translate-x-0 lg:static
+          flex flex-col
+        `}
+      >
+        {/* Logo */}
+        <div className="h-14 flex items-center px-4 border-b border-[#343c46] gap-2">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-violet-500 flex items-center justify-center">
+            <Zap className="w-4 h-4 text-white" />
+          </div>
+          {!collapsed && (
+            <span className="font-bold text-white text-lg">SR</span>
           )}
-        </button>
-      </div>
-    </aside>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 py-4 px-3 overflow-y-auto">
+          {navGroups.map((group) => (
+            <SidebarGroup
+              key={group.label}
+              group={group}
+              collapsed={collapsed}
+              isOpen={openGroups[group.label]}
+              onToggle={() => toggleGroup(group.label)}
+            />
+          ))}
+        </nav>
+
+        {/* User */}
+        {!collapsed && (
+          <div className="mx-3 mb-2 p-3 rounded-xl bg-white/5 border border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                JD
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-white">John Doe</p>
+                <p className="text-xs text-slate-400">Admin</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Collapse button (desktop only) */}
+        <div className="hidden lg:flex justify-center py-2 border-t border-[#343c46]">
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="w-8 h-8 flex items-center justify-center rounded-md text-slate-400 hover:bg-slate-800"
+          >
+            {collapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }
