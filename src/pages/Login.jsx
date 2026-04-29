@@ -1,9 +1,9 @@
 import { useState } from "react";
-// 👇 FIX 1: CheckCircle2 icon import kiya features list ke liye
-import { Eye, EyeOff, LogIn, Building2, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, LogIn, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
+
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -15,114 +15,103 @@ export default function Login() {
   });
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const success = await login({
-    login: form.username.trim(),   // 👈 THIS MUST BE EMAIL
-    password: form.password,
-  });
+    const success = await login({
+      login: form.username.trim(),
+      password: form.password,
+    });
 
-  if (!success) {
-    alert("Invalid credentials ❌");
-    return;
-  }
+    if (!success) {
+      alert("Invalid credentials ❌");
+      return;
+    }
 
-  navigate("/dashboard", { replace: true });
-};
+    navigate("/dashboard", { replace: true });
+  };
+
   return (
-    <div className="fixed inset-0 bg-slate-50 flex items-center justify-center p-4 sm:p-8 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <div className="fixed inset-0 bg-slate-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
       
-      <div className="w-full max-w-5xl bg-white rounded-[32px] shadow-2xl flex overflow-hidden min-h-[600px] border border-slate-200 m-auto">
-        
-        {/* LEFT SIDE: Dark Panel */}
-        <div className="hidden lg:flex w-1/2 bg-slate-900 p-12 flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-600/20 to-transparent pointer-events-none"></div>
-          
-          <div className="relative z-10">
-            <div className="flex items-center gap-4">
-  <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg p-2">
-    <img src={logo} alt="logo" className="w-full h-full object-contain" />
-  </div>
+      <div className="w-full max-w-5xl bg-white rounded-[32px] shadow-2xl flex overflow-hidden min-h-[600px] border border-slate-200">
 
-  <div>
-    <h1 className="text-2xl xl:text-3xl font-bold text-white leading-tight">
-      Sruthika Constructions
-    </h1>
-  </div>
-</div>
-            <p className="mt-4 text-sm leading-relaxed text-slate-300 max-w-md">
+        {/* LEFT SIDE */}
+        <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-slate-900 to-blue-950 px-10 py-12 flex-col justify-center gap-10 relative">
+
+          <div className="max-w-md">
+            {/* Logo + Title */}
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center shadow-lg p-2">
+                <img src={logo} alt="logo" className="w-full h-full object-contain" />
+              </div>
+
+              <h1 className="text-2xl font-bold text-white">
+                Sruthika Constructions
+              </h1>
+            </div>
+
+            {/* Description */}
+            <p className="mt-4 text-sm text-slate-300 leading-relaxed">
               Manage projects, reports, materials, machinery, labour and stock
               from one premium dashboard experience built for smooth daily operations.
             </p>
 
-            {/* 👇 FIX 2: Khali space ko bharne ke liye naya feature list add kar diya */}
-            <div className="mt-10 space-y-5">
+            {/* Features */}
+            <div className="mt-8 space-y-4">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-5 h-5 text-blue-500" />
-                <span className="text-slate-300 text-sm font-medium">Real-time inventory tracking</span>
+                <span className="text-slate-300 text-sm">
+                  Real-time inventory tracking
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-5 h-5 text-blue-500" />
-                <span className="text-slate-300 text-sm font-medium">Automated daily reports</span>
+                <span className="text-slate-300 text-sm">
+                  Automated daily reports
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="w-5 h-5 text-blue-500" />
-                <span className="text-slate-300 text-sm font-medium">Secure role-based access control</span>
+                <span className="text-slate-300 text-sm">
+                  Secure role-based access control
+                </span>
               </div>
-            </div>
-          </div>
-
-          <div className="relative z-10 rounded-2xl border border-white/10 bg-white/5 p-6 mt-8 backdrop-blur-sm">
-            <p className="text-sm font-bold text-white tracking-wide uppercase">
-              Demo Access
-            </p>
-            <div className="mt-4 space-y-3 text-sm text-slate-300">
-              <p className="flex justify-between border-b border-white/10 pb-2">
-                <span className="font-medium text-white">Admin</span> 
-                <span>admin / admin123</span>
-              </p>
-              <p className="flex justify-between border-b border-white/10 pb-2">
-                <span className="font-medium text-white">Manager</span> 
-                <span>manager / manager123</span>
-              </p>
-              <p className="flex justify-between">
-                <span className="font-medium text-white">Supervisor</span> 
-                <span>supervisor / supervisor123</span>
-              </p>
             </div>
           </div>
         </div>
 
-        {/* RIGHT SIDE: Light Panel */}
-        <div className="w-full lg:w-1/2 p-8 sm:p-12 lg:p-16 flex items-center justify-center bg-white">
-          <div className="w-full max-w-md">
-            
-            <div className="flex items-center justify-center gap-3">
-  <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg p-2">
-    <img src={logo} alt="logo" className="w-full h-full object-contain" />
-  </div>
+        {/* RIGHT SIDE */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center bg-white px-6 sm:px-10 lg:px-14">
 
-  <div className="text-left">
-    <h1 className="text-lg font-bold text-slate-900 leading-tight">
-      Sruthika Constructions
-    </h1>
-  
-  </div>
-</div>
+          <div className="w-full max-w-sm mx-auto text-left">
 
-            <div className="mb-10 text-left">
-              <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider">Welcome back</p>
-              <h2 className="mt-2 text-3xl font-heading font-bold text-slate-900 tracking-tight">
-                Sign in to your account
-              </h2>
-              <p className="mt-2 text-sm text-slate-500">
-                Access your construction workspace and manage daily operations.
-              </p>
+            {/* Logo + Title */}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-md p-2">
+                <img src={logo} alt="logo" className="w-full h-full object-contain" />
+              </div>
+
+              <h1 className="text-base font-semibold text-slate-900">
+                Sruthika Constructions
+              </h1>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Heading */}
+            <div className="mt-4">
+              <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                Welcome back
+              </p>
+              <h2 className="mt-1 text-2xl font-bold text-slate-900">
+                Sign in to your account
+              </h2>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+
+              {/* Username */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
                   Username
                 </label>
                 <input
@@ -130,13 +119,14 @@ export default function Login() {
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, username: e.target.value }))
                   }
-                  className="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 outline-none transition focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
+                  className="w-full h-11 rounded-xl border border-slate-200 px-4 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
                   placeholder="Enter username"
                 />
               </div>
 
+              {/* Password */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
                   Password
                 </label>
                 <div className="relative">
@@ -146,13 +136,13 @@ export default function Login() {
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, password: e.target.value }))
                     }
-                    className="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 pr-12 text-slate-900 placeholder:text-slate-400 outline-none transition focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
+                    className="w-full h-11 rounded-xl border border-slate-200 px-4 pr-12 text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
                     placeholder="Enter password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
                   >
                     {showPassword ? (
                       <EyeOff className="w-5 h-5" />
@@ -163,41 +153,30 @@ export default function Login() {
                 </div>
               </div>
 
+              {/* Button */}
               <button
                 type="submit"
-                className="w-full h-12 mt-4 rounded-xl bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/20 hover:bg-blue-700 hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="w-full h-11 mt-2 rounded-xl bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 transition flex items-center justify-center gap-2"
               >
                 <LogIn className="w-4 h-4" />
                 Sign In
               </button>
             </form>
-            <p className="mt-6 text-sm text-center text-slate-500">
-  Don’t have an account?{" "}
-  <span
-    className="text-blue-600 cursor-pointer"
-    onClick={() => navigate("/register")}
-  >
-    Register
-  </span>
-</p>
 
-            <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:hidden">
-              <p className="text-sm font-bold text-slate-900 tracking-wide uppercase">Demo Access</p>
-              <div className="mt-3 space-y-2 text-sm text-slate-600">
-                <p className="flex justify-between border-b border-slate-200 pb-1">
-                  <span className="font-semibold text-slate-900">Admin</span> <span>admin / admin123</span>
-                </p>
-                <p className="flex justify-between border-b border-slate-200 pb-1">
-                  <span className="font-semibold text-slate-900">Manager</span> <span>manager / manager123</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-semibold text-slate-900">Supervisor</span> <span>supervisor / supervisor123</span>
-                </p>
-              </div>
-            </div>
+            {/* Footer */}
+            <p className="mt-4 text-sm text-center text-slate-500">
+              Don’t have an account?{" "}
+              <span
+                className="text-blue-600 cursor-pointer"
+                onClick={() => navigate("/register")}
+              >
+                Register
+              </span>
+            </p>
 
           </div>
         </div>
+
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search,
   Plus,
@@ -35,11 +35,11 @@ export default function Users() {
   const [users, setUsers] = useState([]);
 
   const [openAddUserPanel, setOpenAddUserPanel] = useState(false);
-  const [openEditUserPanel, setOpenEditUserPanel] = useState(false);
+  const [_openEditUserPanel, setOpenEditUserPanel] = useState(false);
 
   const [editingUserId, setEditingUserId] = useState(null);
   const [page, setPage] = useState(1);
-const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [userForm, setUserForm] = useState({
     name: "",
@@ -51,9 +51,7 @@ const [totalPages, setTotalPages] = useState(1);
     status: "Active",
   });
 
-  useEffect(() => {
-  fetchUsers();
-}, [page]);
+
 
   const fetchUsers = async () => {
   try {
@@ -61,14 +59,23 @@ const [totalPages, setTotalPages] = useState(1);
       page,
       per_page: 10,
     });
-
-    setUsers(res.data.data || []);
+     
+    
+   setUsers(res.data.data || []);
     setTotalPages(res.data.pagination?.last_page || 1);
 
   } catch (error) {
     console.error(error);
   }
-};
+}; 
+const hasFetched = useRef(false);
+useEffect(() => {
+  if (!hasFetched.current) {
+    hasFetched.current = true;
+    fetchUsers();
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   const filteredUsers = useMemo(() => {
     const q = search.toLowerCase();
@@ -144,7 +151,7 @@ const [totalPages, setTotalPages] = useState(1);
     setOpenEditUserPanel(true);
   };
 
- const handleUpdateUser = async () => {
+ const _handleUpdateUser = async () => {
   try {
     const payload = {
       name: userForm.name,
@@ -185,7 +192,7 @@ const [totalPages, setTotalPages] = useState(1);
       <AdminLayout>
         <div className="space-y-4">
           {/* HEADER */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <p className="text-sm md:text-[15px] leading-6 text-muted-foreground">
               Manage supervisors, managers, and vendor accounts from one place.
             </p>
@@ -233,8 +240,8 @@ const [totalPages, setTotalPages] = useState(1);
           </div>
 
           {/* TABLE */}
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <table className="w-full text-sm border-collapse">
+          <div className="bg-card rounded-xl border border-border overflow-hidden overflow-x-auto">
+            <table className="w-full text-sm border-collapse min-w-[800px]">
   <thead>
     <tr className="bg-secondary/50">
       <th className="text-left py-3 px-4 border-b border-border border-r border-border">Name</th>
@@ -284,7 +291,7 @@ const [totalPages, setTotalPages] = useState(1);
   </tbody>
 </table>
           </div>
-          <div className="flex justify-between items-center mt-4 px-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mt-4 px-4">
   <button
     onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
     disabled={page === 1}

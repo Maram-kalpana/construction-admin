@@ -41,20 +41,14 @@ export default function Accounts() {
   const [selectedDate, setSelectedDate] = useState("");
   const [rows, setRows] = useState(() => {
     const saved = localStorage.getItem("accountsData");
-    return saved ? JSON.parse(saved) : initialRows;
+    return saved ? JSON.parse(saved) : [];
   });
-  const [projectOptions, setProjectOptions] = useState(getProjectsFromStorage);
+  const [projectOptions, _setProjectOptions] = useState(getProjectsFromStorage);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState("add");
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(emptyForm);
-
-  useEffect(() => {
-    if (drawerOpen) {
-      setProjectOptions(getProjectsFromStorage());
-    }
-  }, [drawerOpen]);
 
   useEffect(() => {
     localStorage.setItem("accountsData", JSON.stringify(rows));
@@ -151,7 +145,7 @@ export default function Accounts() {
     <>
       <AdminLayout>
         <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <p className="text-sm md:text-[15px] leading-6 text-muted-foreground">
               {rows.length} account entries.
             </p>
@@ -200,8 +194,8 @@ export default function Accounts() {
             Current Balance: ₹{totalAllocated.toLocaleString()}
           </div>
 
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-  <table className="w-full text-sm border-collapse">
+          <div className="bg-card rounded-xl border border-border overflow-hidden overflow-x-auto">
+  <table className="w-full text-sm border-collapse min-w-[650px]">
 
     {/* HEADER */}
     <thead>

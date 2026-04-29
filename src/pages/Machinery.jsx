@@ -241,8 +241,8 @@ export default function Machinery() {
         </p>
 
         <div className="rounded-[28px] border border-border bg-card p-4 md:p-5 shadow-sm">
-         <div className="flex items-center gap-2">
-            <div className="relative min-w-[220px]">
+         <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative w-full sm:min-w-[220px]">
               <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
                 Project
               </label>
@@ -263,7 +263,7 @@ export default function Machinery() {
               <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             </div>
 
-            <div className="relative min-w-[185px]">
+            <div className="relative w-full sm:min-w-[185px]">
               <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
                 Date
               </label>
@@ -277,8 +277,8 @@ export default function Machinery() {
           </div>
         </div>
 
-        <div className="bg-card rounded-[28px] border border-border overflow-visible relative">
-          <div className="overflow-x-auto w-full"
+        <div className="bg-card rounded-[28px] border border-border overflow-hidden relative">
+          <div className="w-full overflow-x-auto"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
@@ -286,12 +286,17 @@ export default function Machinery() {
           >
             <style>
               {`
-                .machinery-scroll-hidden::-webkit-scrollbar {
-                  display: none;
+                .machinery-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.machinery-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
                 }
               `}
             </style>
-<table className="w-full table-fixed border border-gray-300 border-collapse text-sm">
+<table className="min-w-[1000px] md:min-w-full border border-gray-300 border-collapse text-sm">
 
   {/* ✅ PERFECT COLUMN CONTROL */}
   <colgroup>

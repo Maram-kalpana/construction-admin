@@ -1,46 +1,34 @@
 import { useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 
 export default function Layout() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile closed by default
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden">
 
-      {/* ✅ Sidebar with fixed width */}
-      <div
-        className="hidden lg:block transition-all duration-300"
-        style={{
-          width: sidebarOpen ? "260px" : "80px",
-        }}
-      >
+      {/* ✅ Sidebar (ONLY ONE) */}
+      <div className="flex-shrink-0">
         <Sidebar
-          collapsed={!sidebarOpen}
-          setCollapsed={(value) => setSidebarOpen(!value)}
-        />
-      </div>
-
-      {/* ✅ Mobile Sidebar (overlay) */}
-      <div className="lg:hidden">
-        <Sidebar
-          collapsed={false}
-          mobile
-          setCollapsed={() => setSidebarOpen(false)}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
         />
       </div>
 
       {/* ✅ Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-[200px] overflow-hidden">
 
-        <Header onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
+        {/* Header */}
+        <Header
+          onToggleSidebar={() =>
+            setSidebarOpen((prev) => !prev)
+          }
+        />
 
-        <main
-          key={location.pathname}
-          className="flex-1 overflow-y-auto bg-background p-4 md:p-6"
-        >
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto bg-background p-4 md:p-6">
           <Outlet />
         </main>
       </div>

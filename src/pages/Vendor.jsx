@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Search, Mail, Phone, MapPin } from "lucide-react";
-import { motion } from "framer-motion";
+import { Search, Pencil, Trash2 } from "lucide-react";
+
 import AdminLayout from "../components/AdminLayout";
 import {
   getVendors,
@@ -9,12 +9,7 @@ import {
   deleteVendorApi,
 } from "../api/projectApi";
 
-const cardColors = [
-  { bgClass: "bg-[#EFF6FF] dark:bg-[#0B1727]", iconClass: "text-[#3B82F6]" },
-  { bgClass: "bg-[#F5F3FF] dark:bg-[#131128]", iconClass: "text-[#A855F7]" },
-  { bgClass: "bg-[#F0FDF4] dark:bg-[#0A1A17]", iconClass: "text-[#22C55E]" },
-  { bgClass: "bg-[#FFFBEB] dark:bg-[#1E1410]", iconClass: "text-[#F59E0B]" },
-];
+
 
 export default function Vendor() {
   const [search, setSearch] = useState("");
@@ -29,9 +24,6 @@ export default function Vendor() {
   type: [], 
 });
 const [showTypeDropdown, setShowTypeDropdown] = useState(false);
-  useEffect(() => {
-    fetchVendors();
-  }, []);
 
   const fetchVendors = async () => {
     try {
@@ -42,6 +34,12 @@ const [showTypeDropdown, setShowTypeDropdown] = useState(false);
       console.error("VENDOR FETCH ERROR ❌", error);
     }
   };
+  
+    useEffect(() => {
+    fetchVendors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   // 🔥 ADD / UPDATE
   const handleSave = async (e) => {
@@ -92,21 +90,14 @@ const [showTypeDropdown, setShowTypeDropdown] = useState(false);
     );
   });
 
-  const getInitials = (name) => {
-    if (!name) return "V";
-    const words = name.trim().split(" ");
-    if (words.length >= 2) {
-      return (words[0][0] + words[1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
+ 
 
   return (
   <AdminLayout>
   <div className="space-y-4">
 
     {/* HEADER */}
-    <div className="flex justify-between items-center">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
       <h2 className="text-xl font-semibold">Vendors</h2>
 
       <button
@@ -132,9 +123,9 @@ const [showTypeDropdown, setShowTypeDropdown] = useState(false);
     </div>
 
     {/* TABLE */}
-    <div className="border rounded-xl overflow-hidden">
-      <div className="border rounded-xl overflow-hidden">
-  <table className="w-full table-fixed border-collapse">
+    <div className="border rounded-xl overflow-hidden overflow-x-auto">
+      <div className="border rounded-xl overflow-hidden overflow-x-auto">
+  <table className="w-full table-fixed border-collapse min-w-[600px]">
 
     {/* HEADER */}
     <thead className="bg-gray-100 text-left">
@@ -177,23 +168,23 @@ const [showTypeDropdown, setShowTypeDropdown] = useState(false);
           <td className="p-3 border-b border-border pr-8">
             <div className="flex justify-end gap-4">
               <button
-                onClick={() => {
-                  setEditId(vendor.id);
-                  setForm({
-                    name: vendor.name,
-                    contact: vendor.contact,
-                    notes: vendor.notes,
-                    type: vendor.type || [],
-                  });
-                  setShowModal(true);
-                }}
-              >
-                ✏️
-              </button>
+  onClick={() => {
+    setEditId(vendor.id);
+    setForm({
+      name: vendor.name,
+      contact: vendor.contact,
+      notes: vendor.notes,
+      type: vendor.type || [],
+    });
+    setShowModal(true);
+  }}
+>
+  <Pencil className="w-4 h-4" />
+</button>
 
-              <button onClick={() => handleDelete(vendor.id)}>
-                🗑
-              </button>
+<button onClick={() => handleDelete(vendor.id)}>
+  <Trash2 className="w-4 h-4 text-red-500" />
+</button>
             </div>
           </td>
 
@@ -207,14 +198,14 @@ const [showTypeDropdown, setShowTypeDropdown] = useState(false);
 
     {/* MODAL */}
     {showModal && (
-      <div className="fixed inset-0 z-50 flex">
+      <div className="fixed inset-0 z-50 flex flex-col sm:flex-row">
 
         <div
           className="flex-1 bg-black/40"
           onClick={() => setShowModal(false)}
         />
 
-        <div className="w-full max-w-md bg-white h-full shadow-xl p-6 animate-slideIn">
+        <div className="w-full sm:max-w-md bg-white h-auto sm:h-full shadow-xl p-4 sm:p-6 animate-slideIn">
 
           <h2 className="text-2xl font-semibold mb-6">
             {editId ? "Edit vendor" : "Add vendor"}

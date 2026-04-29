@@ -537,15 +537,15 @@ export default function Reports() {
 
         <div className="bg-card rounded-[28px] border border-border overflow-visible relative">
           <div className="border-b border-border px-4">
-            <div className="flex w-full border-b border-border">
+           <div className="flex gap-2 overflow-x-auto no-scrollbar border-b border-border px-2">
   {tabs.map((tab) => (
     <button
   key={tab}
   onClick={() => setActiveTab(tab)}
-  className={`flex-1 text-center py-3 text-sm font-semibold border-b-2 transition ${
-    activeTab === tab
-      ? "text-foreground border-primary"
-      : "text-muted-foreground border-transparent"
+  className={`flex-shrink-0 px-4 py-2 text-sm font-medium rounded-lg transition whitespace-nowrap ${
+   activeTab === tab
+  ? "bg-primary text-white"
+  : "text-muted-foreground hover:bg-muted"
   }`}
 >
   {tab}

@@ -340,13 +340,13 @@ const Projects = () => {
         <div className="space-y-4">
 
           {/* Top bar */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
             <p className="text-sm md:text-[15px] leading-6 text-muted-foreground">
               {projects.length} total construction projects.
             </p>
             <button
               onClick={() => { resetForm(); setOpenAddPanel(true); }}
-              className="h-11 px-5 rounded-2xl bg-primary text-white text-sm font-semibold flex items-center gap-2 hover:opacity-90 transition shadow-md shadow-primary/25"
+              className="h-10 px-4 rounded-xl bg-primary text-white text-sm font-semibold flex items-center gap-2 hover:opacity-90 transition shadow-md shadow-primary/25 whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
               Add Project
@@ -354,22 +354,23 @@ const Projects = () => {
           </div>
 
           {/* Search + Filter */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="relative flex-1 max-w-sm">
+                    {/* Search + Filter */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-nowrap overflow-x-auto pb-1">
+            <div className="relative flex-shrink-0 w-[160px] sm:w-[200px] lg:w-[250px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 type="text"
-                placeholder="Search project..."
-                className="w-full h-10 pl-10 pr-4 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
+                placeholder="Search..."
+                className="w-full h-10 pl-10 pr-3 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
               />
             </div>
             {["All", "Active", "Inactive", "Pending"].map((s) => (
               <button
                 key={s}
                 onClick={() => setFilter(s)}
-                className={`h-10 px-5 rounded-2xl text-sm font-semibold transition ${
+                className={`h-9 sm:h-10 px-3 sm:px-5 rounded-2xl text-xs sm:text-sm font-semibold whitespace-nowrap transition flex-shrink-0 ${
                   filter === s
                     ? "bg-primary text-white shadow-md shadow-primary/25"
                     : "bg-transparent text-foreground hover:bg-secondary"
@@ -379,10 +380,9 @@ const Projects = () => {
               </button>
             ))}
           </div>
-
           {/* Table */}
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <table className="w-full text-sm border-collapse">
+          <div className="bg-card rounded-xl border border-border overflow-hidden overflow-x-auto">
+            <table className="w-full text-sm border-collapse min-w-[800px]">
   <thead>
     <tr className="bg-secondary/50">
       {["Project Name","Manager","Start Date","Location","Budget","Status","Actions"].map((h, i) => (
@@ -434,7 +434,7 @@ const Projects = () => {
           <td className="py-4 px-5 border-b border-border text-right">
             <div className="flex items-center justify-end gap-4">
               <button onClick={() => handleEditClick(project)}>
-                <Pencil className="w-4 h-4 text-emerald-700" />
+                <Pencil className="w-4 h-4 text-black"  />
               </button>
               <button onClick={() => handleDeleteProject(project.id)}>
                 <Trash2 className="w-4 h-4 text-red-500" />
