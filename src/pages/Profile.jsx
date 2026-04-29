@@ -14,11 +14,13 @@ import AdminLayout from "../components/AdminLayout";
 
 export default function Profile() {
   const [form, setForm] = useState({
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+91 9876543210",
-    role: "Admin",
-  });
+  name: "John Doe",
+  email: "john@example.com",
+  phone: "+91 9876543210",
+  role: "Admin",
+  oldPassword: "",
+  newPassword: "",
+});
 
   const [savedMessage, setSavedMessage] = useState("");
 
@@ -62,7 +64,7 @@ export default function Profile() {
           </p>
         )}
 
-        <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+        <div className="grid gap-6">
           <div className="bg-card border border-border rounded-[24px] p-6 md:p-8 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-6 border-b border-border">
               <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold shrink-0 shadow-md shadow-blue-600/20">
@@ -112,6 +114,23 @@ export default function Profile() {
                 value={form.role}
                 readOnly
               />
+              <Field
+  label="Old Password"
+  icon={Shield}
+  value={form.oldPassword || ""}
+  onChange={(value) =>
+    setForm((prev) => ({ ...prev, oldPassword: value }))
+  }
+/>
+
+<Field
+  label="New Password"
+  icon={Shield}
+  value={form.newPassword || ""}
+  onChange={(value) =>
+    setForm((prev) => ({ ...prev, newPassword: value }))
+  }
+/>
             </div>
 
             <div className="mt-8 flex justify-end">
@@ -125,54 +144,8 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="bg-card border border-border rounded-[24px] p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center">
-                  <Briefcase className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-heading font-semibold text-foreground text-lg">
-                    Assigned Project
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Project currently linked to your account
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <ProjectInfo
-                  icon={Briefcase}
-                  label="Project Name"
-                  value={assignedProject.name}
-                />
-                <ProjectInfo
-                  icon={MapPin}
-                  label="Location"
-                  value={assignedProject.location}
-                />
-                <ProjectInfo
-                  icon={CalendarDays}
-                  label="Start Date"
-                  value={assignedProject.startDate}
-                />
-              </div>
-            </div>
-
-            <div className="bg-card border border-border rounded-[24px] p-6 shadow-sm">
-              <h3 className="font-heading font-semibold text-foreground text-lg mb-4">
-                Account Summary
-              </h3>
-
-              <div className="space-y-3">
-                <InfoRow label="Username" value="johndoe" />
-                <InfoRow label="Status" value="Active" valueClass="text-green-600" />
-                <InfoRow label="User ID" value="USR-001" />
-                <InfoRow label="Department" value="Administration" />
-              </div>
-            </div>
-          </div>
+          
+            
         </div>
       </div>
     </AdminLayout>

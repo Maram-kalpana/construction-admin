@@ -136,7 +136,7 @@ export default function Sidebar({ isOpen, onClose }) {
       icon: UserCircle,
       items: [
         { label: "Profile", icon: UserCircle, path: "/dashboard/profile" },
-        { label: "Settings", icon: Cog, path: "/dashboard/settings" },
+        // { label: "Settings", icon: Cog, path: "/dashboard/settings" },
       ],
     },
   ];

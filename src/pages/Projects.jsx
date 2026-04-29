@@ -92,13 +92,17 @@ const Projects = () => {
     startDate: "", budget: "", status: "Active",
   };
   const [form, setForm] = useState(emptyForm);
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 5;
 
   // ── Fetch on mount ──────────────────────────────────────────────────────
   useEffect(() => {
     fetchProjects();
     fetchManagers();
   }, []);
-
+useEffect(() => {
+  setCurrentPage(1);
+}, [search, filter]);
   const fetchProjects = async () => {
     try {
       const res = await getProjects();
@@ -149,11 +153,10 @@ const Projects = () => {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return projects.filter((p) => {
-      const matchStatus = filter === "All" || p.status === filter ||
-        // handle boolean status from API
-        (filter === "Active"   && p.status === true) ||
-        (filter === "Inactive" && p.status === false);
-
+      const matchStatus =
+  filter === "All" ||
+  (filter === "Active" && Number(p.status) === 1) ||
+  (filter === "Inactive" && Number(p.status) === 0);
       const managerName = (p.manager?.name ?? p.manager ?? "").toLowerCase();
       const matchSearch =
         (p.name        ?? "").toLowerCase().includes(q) ||
@@ -164,7 +167,12 @@ const Projects = () => {
       return matchStatus && matchSearch;
     });
   }, [projects, filter, search]);
+const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
+const paginatedData = useMemo(() => {
+  const start = (currentPage - 1) * itemsPerPage;
+  return filtered.slice(start, start + itemsPerPage);
+}, [filtered, currentPage]);
   const resetForm = () => setForm(emptyForm);
 
   // ── Add Project ─────────────────────────────────────────────────────────
@@ -256,10 +264,10 @@ const Projects = () => {
 
   // ── Helper: display status ──────────────────────────────────────────────
   const displayStatus = (status) => {
-    if (status === true  || status === "Active")   return "Active";
-    if (status === false || status === "Inactive") return "Inactive";
-    return status ?? "-";
-  };
+  if (status === 1 || status === "1" || status === true) return "Active";
+  if (status === 0 || status === "0" || status === false) return "Inactive";
+  return "-";
+};
 
   // ── Manager Dropdown Options ────────────────────────────────────────────
   const ManagerOptions = () => (
@@ -366,7 +374,7 @@ const Projects = () => {
                 className="w-full h-10 pl-10 pr-3 rounded-lg bg-card border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
               />
             </div>
-            {["All", "Active", "Inactive", "Pending"].map((s) => (
+            {["All", "Active", "Inactive",].map((s) => (
               <button
                 key={s}
                 onClick={() => setFilter(s)}
@@ -387,49 +395,48 @@ const Projects = () => {
     <tr className="bg-secondary/50">
       {["Project Name","Manager","Start Date","Location","Budget","Status","Actions"].map((h, i) => (
         <th
-          key={h}
-          className={`py-4 px-5 font-medium text-muted-foreground 
-          border-b border-border 
-          border-r border-border last:border-r-0
-          ${i === 6 ? "text-right" : "text-left"}`}
-        >
-          {h}
-        </th>
+  key={h}
+  className={`py-4 px-5 font-medium text-muted-foreground 
+  border-b border-r border-border last:border-r-0
+  ${i === 6 ? "text-right" : "text-left"}`}
+>
+  {h}
+</th>
       ))}
     </tr>
   </thead>
 
   <tbody>
-    {filtered.map((project) => {
+    {paginatedData.map((project) => {
       const statusLabel = displayStatus(project.status);
 
       return (
         <tr key={project.id} className="hover:bg-secondary/30 transition">
-          <td className="py-4 px-5 border-b border-border border-r border-border">
-            {project.name}
-          </td>
+         <td className="py-4 px-5 border-b border-r border-border">
+  {project.name}
+</td>
 
-          <td className="py-4 px-5 border-b border-border border-r border-border">
-            {project.manager?.name ?? project.manager ?? "-"}
-          </td>
+<td className="py-4 px-5 border-b border-r border-border">
+  {project.manager?.name ?? project.manager ?? "-"}
+</td>
 
-          <td className="py-4 px-5 border-b border-border border-r border-border">
-            {project.start_date ?? project.startDate ?? "-"}
-          </td>
+<td className="py-4 px-5 border-b border-r border-border">
+  {project.start_date ?? project.startDate ?? "-"}
+</td>
 
-          <td className="py-4 px-5 border-b border-border border-r border-border">
-            {project.location ?? "-"}
-          </td>
+<td className="py-4 px-5 border-b border-r border-border">
+  {project.location ?? "-"}
+</td>
 
-          <td className="py-4 px-5 border-b border-border border-r border-border">
-            {project.budget ?? "-"}
-          </td>
+<td className="py-4 px-5 border-b border-r border-border">
+  {project.budget ?? "-"}
+</td>
 
-          <td className="py-4 px-5 border-b border-border border-r border-border">
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[statusLabel] ?? "bg-gray-100 text-gray-600"}`}>
-              {statusLabel}
-            </span>
-          </td>
+<td className="py-4 px-5 border-b border-r border-border">
+  <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[statusLabel] ?? "bg-gray-100 text-gray-600"}`}>
+    {statusLabel}
+  </span>
+</td>
 
           <td className="py-4 px-5 border-b border-border text-right">
             <div className="flex items-center justify-end gap-4">
@@ -446,9 +453,37 @@ const Projects = () => {
     })}
   </tbody>
 </table>
+
+
           </div>
         </div>
       </AdminLayout>
+      <div className="flex items-center justify-between px-4 py-4 border-t border-border">
+  
+  {/* Previous */}
+  <button
+    disabled={currentPage === 1}
+    onClick={() => setCurrentPage((p) => p - 1)}
+    className="px-4 py-2 rounded-lg border border-border text-sm disabled:opacity-50"
+  >
+    Previous
+  </button>
+
+  {/* Page Info */}
+  <p className="text-sm text-muted-foreground font-medium">
+    Page {currentPage} of {totalPages}
+  </p>
+
+  {/* Next */}
+  <button
+    disabled={currentPage === totalPages}
+    onClick={() => setCurrentPage((p) => p + 1)}
+    className="px-4 py-2 rounded-lg border border-border text-sm disabled:opacity-50"
+  >
+    Next
+  </button>
+
+</div>
 
       {/* ADD PANEL */}
       <SlidePanel open={openAddPanel} onClose={() => setOpenAddPanel(false)}>
@@ -477,6 +512,6 @@ const Projects = () => {
       </SlidePanel>
     </>
   );
-};
+};``
 
 export default Projects;

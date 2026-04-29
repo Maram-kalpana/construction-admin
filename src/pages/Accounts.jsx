@@ -2,6 +2,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Eye, Pencil, Plus, Trash2, X, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
+import {
+  getAllocations,
+  addAllocation,
+  updateAllocation,
+  deleteAllocation,
+} from "../api/accountApi";
+import { getUsers, getProjects } from "../api/projectApi";
 
 const usersData = [
   { name: "Ravi Kumar", email: "ravi@gmail.com", role: "manager" },
@@ -10,11 +17,12 @@ const usersData = [
 ];
 
 const emptyForm = {
+  user_id: "",
+  project_id: "",
+  amountAllocated: "",
   name: "",
   designation: "",
   mailId: "",
-  amountAllocated: "",
-  project: "",
 };
 
 function SlidePanel({ open, onClose, children }) {
@@ -39,37 +47,97 @@ export default function Accounts() {
   const navigate = useNavigate();
 
   const [selectedDate, setSelectedDate] = useState("");
-  const [rows, setRows] = useState(() => {
-    const saved = localStorage.getItem("accountsData");
-    return saved ? JSON.parse(saved) : [];
-  });
+ const [rows, setRows] = useState([]);
+const [totalPages, setTotalPages] = useState(1);
   const [projectOptions, _setProjectOptions] = useState(getProjectsFromStorage);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState("add");
   const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState(emptyForm);
+  const [formData, setFormData] = useState({
+  user_id: "",
+  project_id: "",
+  amountAllocated: "",
+  designation: "",
+  name: "",
+  mailId: "",
+});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [users, setUsers] = useState([]);
+const [projects, setProjects] = useState([]);
+const itemsPerPage = 5;
 
-  useEffect(() => {
-    localStorage.setItem("accountsData", JSON.stringify(rows));
-    window.dispatchEvent(new Event("dashboard-data-updated"));
-  }, [rows]);
+useEffect(() => {
+  fetchUsers();
+  fetchProjects();
+}, []);
+
+useEffect(() => {
+  fetchAllocations();
+}, [currentPage]);
+
+const fetchUsers = async () => {
+  try {
+    const res = await getUsers({ per_page: 100 }); // get all
+    setUsers(res.data.data || []);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const fetchProjects = async () => {
+  try {
+    const res = await getProjects({ per_page: 100 });
+    setProjects(res.data.data || []);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+  const fetchAllocations = async () => {
+  try {
+    const res = await getAllocations({
+      page: currentPage,
+      per_page: 5,
+    });
+
+    setRows(res.data.data || []);
+    setTotalPages(res.data.pagination?.last_page || 1);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const filteredRows = useMemo(() => {
   return rows.filter((row) => {
-    return selectedDate ? row.date === selectedDate : true;
+    return selectedDate ?row.created_at?.split("T")[0] === selectedDate  : true;
   });
 }, [rows, selectedDate]);
 
-  const totalAllocated = rows.reduce(
-    (sum, row) => sum + Number(row.amountAllocated || 0),
-    0
-  );
 
-  const handleDelete = (id) => {
-    setRows((prev) => prev.filter((row) => row.id !== id));
-  };
 
+
+ const totalAllocated = rows.reduce(
+  (sum, row) => sum + Number(row.amount || 0),
+  0
+);
+
+  const handleDelete = async (id) => {
+  try {
+    if (!window.confirm("Delete this allocation?")) return;
+
+    const res = await deleteAllocation(id);
+
+    if (res.data.success) {
+      alert(res.data.message);
+      fetchAllocations();
+    }
+
+  } catch (error) {
+    console.error(error);
+  }
+};
   const openAllocateDrawer = () => {
     setDrawerMode("add");
     setEditingId(null);
@@ -78,17 +146,41 @@ export default function Accounts() {
   };
 
   const openEditDrawer = (row) => {
-    setDrawerMode("edit");
-    setEditingId(row.id);
-    setFormData({
-      name: row.name,
-      designation: row.designation,
-      mailId: row.mailId,
-      amountAllocated: row.amountAllocated,
-      project: row.project || "",
-    });
-    setDrawerOpen(true);
-  };
+  setDrawerMode("edit");
+  setEditingId(row.id);
+
+  const matchedUser = users.find(
+    (u) =>
+      u.email?.toLowerCase().trim() ===
+      row.email?.toLowerCase().trim()
+  );
+
+  const matchedProject = projects.find(
+    (p) =>
+      p.name?.toLowerCase().trim() ===
+      row.project?.toLowerCase().trim()
+  );
+
+  // 🔥 HARD SAFETY
+  if (!matchedUser || !matchedProject) {
+    alert("User or Project mapping failed ❌");
+    console.log("ROW:", row);
+    console.log("USERS:", users);
+    console.log("PROJECTS:", projects);
+    return;
+  }
+
+  setFormData({
+    user_id: matchedUser.id,
+    project_id: matchedProject.id,
+    amountAllocated: row.amount || "",
+    designation: row.designation || "",
+    name: row.name || "",
+    mailId: row.email || "",
+  });
+
+  setDrawerOpen(true);
+};
 
   const closeDrawer = () => {
     setDrawerOpen(false);
@@ -96,51 +188,49 @@ export default function Accounts() {
     setFormData(emptyForm);
   };
 
-  const handleSave = () => {
-    if (!formData.name.trim()) return alert("Please enter name");
-    if (!formData.designation) return alert("Please select designation");
-    if (!formData.mailId.trim()) return alert("Please enter mail ID");
-    if (!formData.amountAllocated.trim()) return alert("Please enter amount allocated");
-    if (!formData.project.trim()) return alert("Please select project");
+  const handleSave = async () => {
+  try {
+    if (!formData.user_id) return alert("Select user");
+    if (!formData.project_id) return alert("Select project");
+    if (!formData.amountAllocated) return alert("Enter amount");
 
     if (drawerMode === "add") {
-      const newRow = {
-        id: Date.now(),
-        name: formData.name,
-        designation: formData.designation,
-        mailId: formData.mailId,
-        amountAllocated: formData.amountAllocated,
-        project: formData.project,
-        date: new Date().toISOString().split("T")[0],
+      const payload = {
+        user_id: Number(formData.user_id),
+        project_id: Number(formData.project_id),
+        amount: Number(formData.amountAllocated),
+        remarks: "Allocated via UI",
       };
 
-      setRows((prev) => [newRow, ...prev]);
+      const res = await addAllocation(payload);
+
+      if (res.data.success) {
+        alert(res.data.message);
+        fetchAllocations();
+        closeDrawer();
+      }
+
     } else {
-      setRows((prev) =>
-        prev.map((row) =>
-          row.id === editingId
-            ? {
-                ...row,
-                name: formData.name,
-                designation: formData.designation,
-                mailId: formData.mailId,
-                amountAllocated: formData.amountAllocated,
-                project: formData.project,
-              }
-            : row
-        )
-      );
-    }
+  const payload = {
+    user_id: Number(formData.user_id),        // ✅ REQUIRED
+    project_id: Number(formData.project_id),  // ✅ REQUIRED
+    amount: Number(formData.amountAllocated),
+    remarks: "Updated via UI",
+  };
 
+  const res = await updateAllocation(editingId, payload);
+
+  if (res.data.success) {
+    alert(res.data.message);
+    fetchAllocations();
     closeDrawer();
-  };
-
-  const handleView = (row) => {
-    navigate("/dashboard/expenses", {
-      state: { person: row },
-    });
-  };
-
+  }
+}
+  } catch (error) {
+    console.error("SAVE ERROR ❌", error.response?.data || error);
+    alert("Something went wrong");
+  }
+};
   return (
     <>
       <AdminLayout>
@@ -200,23 +290,23 @@ export default function Accounts() {
     {/* HEADER */}
     <thead>
       <tr className="bg-secondary/50">
-        <th className="text-left py-3 px-4 border-b border-border border-r border-border">
+        <th className="text-left py-3 px-4 border-b  border-r border-border">
           Name
         </th>
 
-        <th className="text-left py-3 px-4 border-b border-border border-r border-border">
+        <th className="text-left py-3 px-4 border-b border-r border-border">
           Designation
         </th>
 
-        <th className="text-left py-3 px-4 border-b border-border border-r border-border">
+        <th className="text-left py-3 px-4 border-b  border-r border-border">
           Mail ID
         </th>
 
-        <th className="text-left py-3 px-4 border-b border-border border-r border-border">
+        <th className="text-left py-3 px-4 border-b  border-r border-border">
           Project
         </th>
 
-        <th className="text-left py-3 px-4 border-b border-border border-r border-border">
+        <th className="text-left py-3 px-4 border-b  border-r border-border">
           Amount Allocated
         </th>
 
@@ -238,24 +328,24 @@ export default function Accounts() {
         filteredRows.map((row) => (
           <tr key={row.id}>
             
-            <td className="py-3 px-4 border-b border-border border-r border-border whitespace-nowrap">
+            <td className="py-3 px-4 border-b  border-r border-border whitespace-nowrap">
               {row.name}
             </td>
 
-            <td className="py-3 px-4 border-b border-border border-r border-border whitespace-nowrap">
+            <td className="py-3 px-4 border-b border-r border-border whitespace-nowrap">
               {row.designation}
             </td>
 
-            <td className="py-3 px-4 border-b border-border border-r border-border whitespace-nowrap">
-              {row.mailId}
+            <td className="py-3 px-4 border-b border-r border-border whitespace-nowrap">
+             {row.email}
             </td>
 
-            <td className="py-3 px-4 border-b border-border border-r border-border whitespace-nowrap">
+            <td className="py-3 px-4 border-b  border-r border-border whitespace-nowrap">
               {row.project || "-"}
             </td>
 
-            <td className="py-3 px-4 border-b border-border border-r border-border whitespace-nowrap">
-              ₹{Number(row.amountAllocated).toLocaleString()}
+            <td className="py-3 px-4 border-b  border-r border-border whitespace-nowrap">
+              ₹{Number(row.amount).toLocaleString()}
             </td>
 
             <td className="py-3 px-4 border-b border-border whitespace-nowrap">
@@ -268,12 +358,16 @@ export default function Accounts() {
                 </button>
 
                 <button
-                  onClick={() => openEditDrawer(row)}
-                  className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-600"
-                >
-                  Edit
-                </button>
-
+  onClick={() => {
+    if (!users.length || !projects.length) {
+      alert("Data still loading, please wait...");
+      return;
+    }
+    openEditDrawer(row);
+  }}
+>
+  Edit
+</button>
                 <button
                   onClick={() => handleDelete(row.id)}
                   className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-500"
@@ -293,6 +387,32 @@ export default function Accounts() {
           </div>
         </div>
       </AdminLayout>
+      <div className="flex items-center justify-between px-4 py-4 border-t border-border">
+
+  {/* Previous */}
+  <button
+    disabled={currentPage === 1}
+    onClick={() => setCurrentPage((p) => p - 1)}
+    className="px-4 py-2 rounded-lg border border-border text-sm hover:bg-secondary disabled:opacity-50"
+  >
+    Previous
+  </button>
+
+  {/* Page Info */}
+  <p className="text-sm text-muted-foreground font-medium">
+    Page {currentPage} of {totalPages || 1}
+  </p>
+
+  {/* Next */}
+  <button
+    disabled={currentPage === totalPages || totalPages === 0}
+    onClick={() => setCurrentPage((p) => p + 1)}
+    className="px-4 py-2 rounded-lg border border-border text-sm hover:bg-secondary disabled:opacity-50"
+  >
+    Next
+  </button>
+
+</div>
 
       <SlidePanel open={drawerOpen} onClose={closeDrawer}>
         <div className="p-7 space-y-5">
@@ -317,8 +437,9 @@ export default function Accounts() {
     setFormData((prev) => ({
       ...prev,
       designation: e.target.value,
-      mailId: "",
+      user_id: "",
       name: "",
+      mailId: "",
     }));
   }}
   className="w-full h-11 rounded-2xl border border-border bg-background px-4"
@@ -327,32 +448,32 @@ export default function Accounts() {
   <option value="manager">Manager</option>
   <option value="accountant">Accountant</option>
 </select>
-
 {/* MAIL ID */}
 <select
-  value={formData.mailId}
+  value={formData.user_id}
   onChange={(e) => {
-    const selectedEmail = e.target.value;
-
-    const selectedUser = usersData.find(
-      (u) => u.email === selectedEmail
+    const selectedUser = users.find(
+      (u) => u.id == e.target.value
     );
 
     setFormData((prev) => ({
       ...prev,
-      mailId: selectedEmail,
+      user_id: e.target.value,
       name: selectedUser?.name || "",
+      mailId: selectedUser?.email || "",
     }));
   }}
-  disabled={!formData.designation}
-  className="w-full h-11 rounded-2xl border border-border bg-background px-4"
+  className="w-full border px-3 py-2 rounded"
 >
-  <option value="">Select Mail ID</option>
-  {usersData
-    .filter((u) => u.role === formData.designation)
+  <option value="">Select user</option>
+
+  {users
+    .filter((u) =>
+      formData.designation ? u.role === formData.designation : true
+    )
     .map((user) => (
-      <option key={user.email} value={user.email}>
-        {user.email} ({user.name})
+      <option key={user.id} value={user.id}>
+        {user.name} ({user.email})
       </option>
     ))}
 </select>
@@ -370,18 +491,24 @@ export default function Accounts() {
             <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
               Project
             </label>
-            <select
-              value={formData.project}
-              onChange={(e) => setFormData((prev) => ({ ...prev, project: e.target.value }))}
-              className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 appearance-none"
-            >
-              <option value="">Select project</option>
-              {projectOptions.map((project) => (
-                <option key={project.id} value={project.name}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
+           <select
+  value={formData.project_id}
+  onChange={(e) =>
+    setFormData((prev) => ({
+      ...prev,
+      project_id: e.target.value,
+    }))
+  }
+  className="w-full border px-3 py-2 rounded"
+>
+  <option value="">Select project</option>
+
+  {projects.map((project) => (
+    <option key={project.id} value={project.id}>
+      {project.name}
+    </option>
+  ))}
+</select>
             <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           </div>
 

@@ -16,7 +16,7 @@ const PAGE_ROUTES = [
   { name: "Reports", path: "/dashboard/reports" },
   { name: "Daily Report", path: "/dashboard/daily-report" },
   { name: "Profile", path: "/dashboard/profile" },
-  { name: "Settings", path: "/dashboard/settings" }
+  // { name: "Settings", path: "/dashboard/settings" }
 ];
 
 export default function Header({ onToggleSidebar }) {
@@ -217,13 +217,13 @@ export default function Header({ onToggleSidebar }) {
                   <User className="w-4 h-4 text-muted-foreground" />
                   My Profile
                 </button>
-                <button 
+                {/* <button 
                   onClick={() => { setIsDrawerOpen(false); navigate('/dashboard/settings'); }}
                   className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-secondary transition"
                 >
                   <Settings className="w-4 h-4 text-muted-foreground" />
                   Settings
-                </button>
+                </button> */}
               </div>
             </div>
             <div className="p-5 border-t border-border">

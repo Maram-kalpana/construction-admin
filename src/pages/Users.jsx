@@ -70,12 +70,8 @@ export default function Users() {
 }; 
 const hasFetched = useRef(false);
 useEffect(() => {
-  if (!hasFetched.current) {
-    hasFetched.current = true;
-    fetchUsers();
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);
+  fetchUsers();
+}, [page]);
 
   const filteredUsers = useMemo(() => {
     const q = search.toLowerCase();
@@ -148,45 +144,53 @@ useEffect(() => {
       password: user.password,
       status: user.status,
     });
-    setOpenEditUserPanel(true);
+    setOpenAddUserPanel(true);
   };
 
- const _handleUpdateUser = async () => {
+const _handleUpdateUser = async () => {
   try {
     const payload = {
       name: userForm.name,
       email: userForm.email,
       phone: userForm.phone,
-      password: userForm.password,
+      password: userForm.password || "123456",
       role: userForm.role.toLowerCase(),
-      status: userForm.status === "Active" ? 1 : 0,
+      status: userForm.status === "Active" ? "1" : "0",
     };
 
-    await updateUserApi(editingUserId, payload);
+    const res = await updateUserApi(editingUserId, payload);
 
-    alert("User updated ✅");
+    if (res.data.success) {
+      alert(res.data.message); // "User updated successfully"
+    }
 
     setOpenEditUserPanel(false);
     setEditingUserId(null);
     resetUserForm();
 
-    fetchUsers(); // refresh UI
+    fetchUsers();
+
   } catch (error) {
-    console.error("UPDATE ERROR ❌", error);
+    console.error("UPDATE ERROR ❌", error.response?.data || error);
   }
 };
   const handleDeleteUser = async (id) => {
   try {
-    await deleteUserApi(id);
+    const confirmDelete = window.confirm("Delete this user?");
+    if (!confirmDelete) return;
 
-    alert("User deleted ✅");
+    const res = await deleteUserApi(id);
 
-    fetchUsers(); // refresh from backend
+    if (res.data.success) {
+      alert(res.data.message); // "User deleted successfully"
+    }
+
+    fetchUsers();
+
   } catch (error) {
-    console.error("DELETE ERROR ❌", error);
+    console.error("DELETE ERROR ❌", error.response?.data || error);
   }
 };
-
   return (
     <>
       <AdminLayout>
@@ -244,13 +248,13 @@ useEffect(() => {
             <table className="w-full text-sm border-collapse min-w-[800px]">
   <thead>
     <tr className="bg-secondary/50">
-      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Name</th>
-      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Email</th>
-      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Phone</th>
-      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Role</th>
-      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Project</th>
-      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Username</th>
-      <th className="text-left py-3 px-4 border-b border-border border-r border-border">Status</th>
+      <th className="text-left py-3 px-4 border-b  border-r border-border">Name</th>
+      <th className="text-left py-3 px-4 border-b  border-r border-border">Email</th>
+      <th className="text-left py-3 px-4 border-b  border-r border-border">Phone</th>
+      <th className="text-left py-3 px-4 border-b  border-r border-border">Role</th>
+      <th className="text-left py-3 px-4 border-b  border-r border-border">Project</th>
+     
+      <th className="text-left py-3 px-4 border-b  border-r border-border">Status</th>
       <th className="text-right py-3 px-4 border-b border-border">Actions</th>
     </tr>
   </thead>
@@ -258,15 +262,15 @@ useEffect(() => {
   <tbody>
     {filteredUsers.map((user) => (
       <tr key={user.id}>
-        <td className="py-3 px-4 border-b border-border border-r border-border">{user.name}</td>
-        <td className="py-3 px-4 border-b border-border border-r border-border">{user.email}</td>
-        <td className="py-3 px-4 border-b border-border border-r border-border">{user.phone || "-"}</td>
-        <td className="py-3 px-4 border-b border-border border-r border-border">{user.role}</td>
-        <td className="py-3 px-4 border-b border-border border-r border-border">{user.project || "N/A"}</td>
-        <td className="py-3 px-4 border-b border-border border-r border-border">{user.username}</td>
-        <td className="py-3 px-4 border-b border-border border-r border-border">
-          {user.status ? "Active" : "Inactive"}
-        </td>
+       <td className="py-3 px-4 border-b border-r border-border">{user.name}</td>
+<td className="py-3 px-4 border-b border-r border-border">{user.email}</td>
+<td className="py-3 px-4 border-b border-r border-border">{user.phone || "-"}</td>
+<td className="py-3 px-4 border-b border-r border-border">{user.role}</td>
+<td className="py-3 px-4 border-b border-r border-border">{user.project || "N/A"}</td>
+
+<td className="py-3 px-4 border-b border-r border-border">
+ {Number(user.status) === 1 ? "Active" : "Inactive"}
+</td>
 
         <td className="py-3 px-4 border-b border-border text-right">
           <div className="flex justify-end gap-3">
@@ -283,7 +287,7 @@ useEffect(() => {
 
     {filteredUsers.length === 0 && (
       <tr>
-        <td colSpan="8" className="text-center py-10 border-b border-border">
+        <td colSpan="7" className="text-center py-10 border-b border-border">
           No users found.
         </td>
       </tr>
@@ -367,15 +371,7 @@ useEffect(() => {
   <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4" />
 </div>
 
-<input
-  type="text"
-  placeholder="Username (login)"
-  value={userForm.username}
-  onChange={(e) =>
-    setUserForm((prev) => ({ ...prev, username: e.target.value }))
-  }
-  className="w-full h-11 rounded-2xl border border-border bg-background px-4"
-/>
+
 
 <input
   type="text"
@@ -405,7 +401,7 @@ useEffect(() => {
 </div>
 
 <button
-  onClick={handleAddUser}
+  onClick={editingUserId ? _handleUpdateUser : handleAddUser}
   className="w-full h-12 rounded-2xl bg-primary text-white font-semibold"
 >
   Save

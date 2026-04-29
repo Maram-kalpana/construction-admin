@@ -24,7 +24,8 @@ export default function Vendor() {
   type: [], 
 });
 const [showTypeDropdown, setShowTypeDropdown] = useState(false);
-
+const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 5;
   const fetchVendors = async () => {
     try {
       const res = await getVendors();
@@ -39,7 +40,9 @@ const [showTypeDropdown, setShowTypeDropdown] = useState(false);
     fetchVendors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+useEffect(() => {
+  setCurrentPage(1);
+}, [search]);
 
   // 🔥 ADD / UPDATE
   const handleSave = async (e) => {
@@ -90,7 +93,12 @@ const [showTypeDropdown, setShowTypeDropdown] = useState(false);
     );
   });
 
- 
+ const totalPages = Math.ceil(filtered.length / itemsPerPage);
+
+const paginatedData = filtered.slice(
+  (currentPage - 1) * itemsPerPage,
+  currentPage * itemsPerPage
+);
 
   return (
   <AdminLayout>
@@ -130,15 +138,15 @@ const [showTypeDropdown, setShowTypeDropdown] = useState(false);
     {/* HEADER */}
     <thead className="bg-gray-100 text-left">
       <tr>
-        <th className="p-3 w-[20%] border-b border-border border-r border-border">
+        <th className="p-3 w-[20%] border-b  border-r border-border">
           Type
         </th>
 
-        <th className="p-3 w-[35%] border-b border-border border-r border-border">
+        <th className="p-3 w-[35%] border-b  border-r border-border">
           Name
         </th>
 
-        <th className="p-3 w-[30%] border-b border-border border-r border-border">
+        <th className="p-3 w-[30%] border-b  border-r border-border">
           Contact
         </th>
 
@@ -150,18 +158,18 @@ const [showTypeDropdown, setShowTypeDropdown] = useState(false);
 
     {/* BODY */}
     <tbody>
-      {filtered.map((vendor) => (
+      {paginatedData.map((vendor) => (
         <tr key={vendor.id}>
           
-          <td className="p-3 border-b border-border border-r border-border capitalize">
+          <td className="p-3 border-b  border-r border-border capitalize">
             {vendor.type?.[0]}
           </td>
 
-          <td className="p-3 border-b border-border border-r border-border">
+          <td className="p-3 border-b  border-r border-border">
             {vendor.name}
           </td>
 
-          <td className="p-3 border-b border-border border-r border-border">
+          <td className="p-3 border-b  border-r border-border">
             {vendor.contact}
           </td>
 
@@ -195,6 +203,32 @@ const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   </table>
 </div>
     </div>
+    <div className="flex items-center justify-between px-4 py-4 border-t border-border">
+
+  {/* Previous */}
+  <button
+    disabled={currentPage === 1}
+    onClick={() => setCurrentPage((p) => p - 1)}
+    className="px-4 py-2 rounded-lg border border-border text-sm hover:bg-gray-100 disabled:opacity-50"
+  >
+    Previous
+  </button>
+
+  {/* Page Info */}
+  <p className="text-sm text-gray-600 font-medium">
+    Page {currentPage} of {totalPages || 1}
+  </p>
+
+  {/* Next */}
+  <button
+    disabled={currentPage === totalPages || totalPages === 0}
+    onClick={() => setCurrentPage((p) => p + 1)}
+    className="px-4 py-2 rounded-lg border border-border text-sm hover:bg-gray-100 disabled:opacity-50"
+  >
+    Next
+  </button>
+
+</div>
 
     {/* MODAL */}
     {showModal && (
