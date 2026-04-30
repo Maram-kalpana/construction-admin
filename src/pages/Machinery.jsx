@@ -14,14 +14,16 @@ import {
 import AdminLayout from "../components/AdminLayout";
 
 const defaultColumns = [
+  { key: "sno", label: "S.No", visible: true },
   { key: "date", label: "Date", visible: true },
-  { key: "party", label: "Party", visible: true },
+  { key: "equipment", label: "Equipment", visible: true },
+  { key: "vendor", label: "Vendor", visible: true },
   { key: "start", label: "Start", visible: true },
   { key: "close", label: "Close", visible: true },
-  { key: "hrs", label: "Hrs", visible: true },
-  { key: "submitted", label: "Submitted", visible: true },
-  { key: "workDone", label: "Work done", visible: true },
-  { key: "measurements", label: "Measurements", visible: true },
+  { key: "total", label: "Total", visible: true },
+  { key: "workDetails", label: "Work Details", visible: true },
+  { key: "reasonEdit", label: "Reason(Edit)", visible: true },
+  { key: "reasonDelete", label: "Reason(Delete)", visible: true },
 ];
 
 // 👇 NAYA FUNCTION: LocalStorage se projects laane ke liye
@@ -47,13 +49,13 @@ export default function Machinery() {
   const [date, setDate] = useState("");
   const [columns, setColumns] = useState(defaultColumns);
 
-  const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
+  const [_headerMenuOpen, setHeaderMenuOpen] = useState(false);
   const [selectedColumnKey, setSelectedColumnKey] = useState("date");
-  const [showFilterRow, setShowFilterRow] = useState(false);
+  const [showFilterRow, _setShowFilterRow] = useState(false);
   const [showManageColumns, setShowManageColumns] = useState(false);
   const [manageSearch, setManageSearch] = useState("");
 
-  const [sortConfig, setSortConfig] = useState({
+  const [sortConfig, _setSortConfig] = useState({
     key: "",
     direction: "",
   });
@@ -69,72 +71,18 @@ export default function Machinery() {
 
   // Note: Yeh abhi dummy data hai, real app mein yeh API/Database se aayega
   const rows = [
-    {
-      id: 1,
-      project: "Project Alpha",
-      date: "2025-04-10",
-      party: "Excavator",
-      start: "08:00",
-      close: "12:30",
-      hrs: "4.5",
-      submitted: "Yes",
-      workDone: "Foundation excavation",
-      measurements: "250 sq ft",
-    },
-    {
-      id: 2,
-      project: "Project Alpha",
-      date: "2025-04-11",
-      party: "Concrete Mixer",
-      start: "09:00",
-      close: "05:00",
-      hrs: "8",
-      submitted: "Yes",
-      workDone: "Slab concrete mixing",
-      measurements: "18 batches",
-    },
-    {
-      id: 3,
-      project: "Project Beta",
-      date: "2025-04-10",
-      party: "Tower Crane",
-      start: "07:30",
-      close: "01:30",
-      hrs: "6",
-      submitted: "No",
-      workDone: "Steel lifting",
-      measurements: "14 lifts",
-    },
-    {
-      id: 4,
-      project: "Project Gamma",
-      date: "2025-04-09",
-      party: "Vibrator",
-      start: "10:00",
-      close: "03:00",
-      hrs: "5",
-      submitted: "Yes",
-      workDone: "Column compaction",
-      measurements: "20 columns",
-    },
-    {
-      id: 5,
-      project: "Project Alpha",
-      date: "2025-04-12",
-      party: "JCB",
-      start: "08:30",
-      close: "11:30",
-      hrs: "3",
-      submitted: "Yes",
-      workDone: "Site leveling",
-      measurements: "300 sq ft",
-    },
-  ];
+  { id: 1, sno: 1, project: "Project Alpha", date: "2025-04-10", equipment: "Excavator", vendor: "ABC Rentals", start: "08:00", close: "12:30", total: "4.5 hrs", workDetails: "Foundation excavation", reasonEdit: "-", reasonDelete: "-" },
+  { id: 2, sno: 2, project: "Project Alpha", date: "2025-04-11", equipment: "Concrete Mixer", vendor: "XYZ Equipment", start: "09:00", close: "05:00", total: "8 hrs", workDetails: "Slab concrete mixing", reasonEdit: "-", reasonDelete: "-" },
+  { id: 3, sno: 3, project: "Project Beta", date: "2025-04-10", equipment: "Tower Crane", vendor: "Lift Corp", start: "07:30", close: "01:30", total: "6 hrs", workDetails: "Steel lifting", reasonEdit: "-", reasonDelete: "-" },
+  { id: 4, sno: 4, project: "Project Gamma", date: "2025-04-09", equipment: "Vibrator", vendor: "Tool Masters", start: "10:00", close: "03:00", total: "5 hrs", workDetails: "Column compaction", reasonEdit: "-", reasonDelete: "-" },
+  { id: 5, sno: 5, project: "Project Alpha", date: "2025-04-12", equipment: "JCB", vendor: "Earth Movers", start: "08:30", close: "11:30", total: "3 hrs", workDetails: "Site leveling", reasonEdit: "-", reasonDelete: "-" },
+];
 
   // Component load hote hi latest projects fetch karega
   useEffect(() => {
     const latestProjects = getStoredProjects();
     setProjectList(latestProjects);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -227,7 +175,7 @@ export default function Machinery() {
     col.label.toLowerCase().includes(manageSearch.toLowerCase())
   );
 
-  const openColumnMenu = (key) => {
+  const _openColumnMenu = (key) => {
     setSelectedColumnKey(key);
     setFilterState((prev) => ({ ...prev, column: key }));
     setHeaderMenuOpen((prev) => (selectedColumnKey === key ? !prev : true));
@@ -241,117 +189,74 @@ export default function Machinery() {
         </p>
 
         <div className="rounded-[28px] border border-border bg-card p-4 md:p-5 shadow-sm">
-         <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative w-full sm:min-w-[220px]">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Project
-              </label>
-              
-              {/* 👇 DYNAMIC DROPDOWN */}
-              <select
-                value={project}
-                onChange={(e) => setProject(e.target.value)}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground outline-none appearance-none focus:ring-2 focus:ring-primary/30"
-              >
-                <option value="">All Projects</option>
-                {projectList.map((p) => (
-                  <option key={p.id} value={p.name}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            </div>
+  <div className="flex flex-col md:flex-row gap-4">
 
-            <div className="relative w-full sm:min-w-[185px]">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Date
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-card rounded-[28px] border border-border overflow-hidden relative">
-          <div className="w-full overflow-x-auto"
-            style={{
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-            }}
-          >
-            <style>
-              {`
-                .machinery-scroll::-webkit-scrollbar {
-  height: 6px;
-}
-.machinery-scroll::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-}
-                }
-              `}
-            </style>
-<table className="min-w-[1000px] md:min-w-full border border-gray-300 border-collapse text-sm">
-
-  {/* ✅ PERFECT COLUMN CONTROL */}
-  <colgroup>
-    <col style={{ width: "140px" }} />
-    <col style={{ width: "180px" }} />
-    <col style={{ width: "120px" }} />
-    <col style={{ width: "120px" }} />
-    <col style={{ width: "70px" }} />
-    <col style={{ width: "120px" }} />
-    <col style={{ width: "200px" }} />
-    <col style={{ width: "140px" }} />
-  </colgroup>
-
-  <thead>
-    <tr className="hover:bg-secondary/20 transition">
-      {visibleColumns.map((col) => {
-        const isSorted = sortConfig.key === col.key;
-        const isAsc = isSorted && sortConfig.direction === "asc";
-        const isDesc = isSorted && sortConfig.direction === "desc";
-
-        return (
-         <th
-  key={col.key}
-  className="border border-gray-300 px-4 py-3 font-semibold text-foreground whitespace-nowrap bg-gray-50"
->
-  <div className="flex items-center">
-    {col.label}
-  </div>
-</th>
-        );
-      })}
-    </tr>
-  </thead>
-
-  <tbody>
-    {filteredRows.map((row) => (
-      <tr key={row.id} className="border-b border-border last:border-0 hover:bg-secondary/20 transition">
-        {visibleColumns.map((col) => (
-          <td
-            key={col.key}
-           className={`border border-gray-300 px-4 py-3 whitespace-nowrap ${
-  col.key === "hrs" || col.key === "submitted"
-    ? "text-center"
-    : "text-left"
-}`}
-          >
-            {row[col.key]}
-          </td>
+    {/* Project Dropdown */}
+    <div className="relative min-w-[220px]">
+      <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
+        Project
+      </label>
+      <select
+        value={project}
+        onChange={(e) => setProject(e.target.value)}
+        className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 appearance-none"
+      >
+        <option value="">All Projects</option>
+        {projectList.map((p) => (
+          <option key={p.id} value={p.name}>
+            {p.name}
+          </option>
         ))}
-      </tr>
-    ))}
-  </tbody>
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+    </div>
 
-</table>
-          </div>
+    {/* Date Filter */}
+   {/* Date Filter + Clear */}
+<div className="flex items-center gap-3">
+  <div className="relative min-w-[220px]">
+    <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
+      Date
+    </label>
+    <input
+      type="date"
+      value={date}
+      onChange={(e) => setDate(e.target.value)}
+      className="w-full h-11 rounded-2xl border border-border bg-background px-4"
+    />
+  </div>
+  <button
+    type="button"
+    onClick={() => setDate("")}
+    className="text-sm font-semibold text-foreground hover:text-primary flex-shrink-0"
+  >
+    Clear
+  </button>
+</div>
+
+  </div>
+</div>
+
+         <div className="bg-card rounded-xl border border-border overflow-hidden overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <table className="min-w-[1000px] border-collapse text-sm">
+            <thead>
+              <tr className="bg-secondary/50">
+                {visibleColumns.map((col) => (
+                  <th key={col.key} className="py-3 px-4 font-semibold text-foreground text-center whitespace-nowrap border-b border-border border-r border-border last:border-r-0">{col.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRows.map((row) => (
+                <tr key={row.id} className="hover:bg-secondary/30 transition">
+                  {visibleColumns.map((col) => (
+                    <td key={col.key} className="py-3 px-4 border-b border-border border-r border-border last:border-r-0 text-center whitespace-nowrap">{row[col.key]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
           {showManageColumns && (
             <div
@@ -416,7 +321,7 @@ export default function Machinery() {
             </div>
           )}
         </div>
-      </div>
+      
     </AdminLayout>
   );
 }

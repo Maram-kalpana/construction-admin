@@ -363,7 +363,7 @@ const paginatedData = useMemo(() => {
 
           {/* Search + Filter */}
                     {/* Search + Filter */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-nowrap overflow-x-auto pb-1">
+          <div className="flex items-center gap-2 sm:gap-3 flex-nowrap overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <div className="relative flex-shrink-0 w-[160px] sm:w-[200px] lg:w-[250px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
@@ -389,20 +389,20 @@ const paginatedData = useMemo(() => {
             ))}
           </div>
           {/* Table */}
-          <div className="bg-card rounded-xl border border-border overflow-hidden overflow-x-auto">
+          <div className="bg-card rounded-xl border border-border overflow-hidden overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <table className="w-full text-sm border-collapse min-w-[800px]">
   <thead>
     <tr className="bg-secondary/50">
-      {["Project Name","Manager","Start Date","Location","Budget","Status","Actions"].map((h, i) => (
-        <th
-  key={h}
-  className={`py-4 px-5 font-medium text-muted-foreground 
-  border-b border-r border-border last:border-r-0
-  ${i === 6 ? "text-right" : "text-left"}`}
->
-  {h}
-</th>
-      ))}
+     {["Project Name","Manager","Start Date","Location","Budget","Status","Actions"].map((h, i) => (
+  <th
+    key={h}
+    className={`py-4 px-5 font-semibold text-foreground 
+    border-b border-r border-border last:border-r-0
+    ${i === 6 ? "text-right" : "text-left"}`}
+  >
+    {h}
+  </th>
+))}
     </tr>
   </thead>
 

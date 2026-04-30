@@ -1,101 +1,46 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ChevronDown,
-  ArrowUp,
-  ArrowDown,
-  MoreVertical,
-  Filter,
-  EyeOff,
-  Columns3,
-  X,
-  Search,
-  Check,
+  ChevronDown, ArrowUp, ArrowDown, MoreVertical, Filter,
+  EyeOff, Columns3, X, Search, Check,
 } from "lucide-react";
 import AdminLayout from "../components/AdminLayout";
 
 const defaultColumns = [
-  { key: "date", label: "Date", visible: true },
-  { key: "item", label: "Item", visible: true },
-  { key: "opening", label: "Opening", visible: true },
-  { key: "in", label: "In", visible: true },
-  { key: "out", label: "Out", visible: true },
-  { key: "closing", label: "Closing", visible: true },
+    { key: "date", label: "Date", visible: true },
+  { key: "vendor", label: "Vendor", visible: true },
+  { key: "work", label: "Work", visible: true },
+  { key: "quantity", label: "Quantity", visible: true },
+  { key: "reasonEdit", label: "Reason(Edit)", visible: true },
+  { key: "reasonDelete", label: "Reason(Delete)", visible: true },
 ];
 
 const stockRows = [
-  {
-    id: 1,
-    date: "2025-04-10",
-    item: "Cement",
-    opening: 120,
-    in: 50,
-    out: 30,
-    closing: 140,
-  },
-  {
-    id: 2,
-    date: "2025-04-10",
-    item: "Steel",
-    opening: 80,
-    in: 20,
-    out: 15,
-    closing: 85,
-  },
-  {
-    id: 3,
-    date: "2025-04-11",
-    item: "Bricks",
-    opening: 500,
-    in: 200,
-    out: 150,
-    closing: 550,
-  },
-  {
-    id: 4,
-    date: "2025-04-12",
-    item: "Sand",
-    opening: 300,
-    in: 100,
-    out: 80,
-    closing: 320,
-  },
-  {
-    id: 5,
-    date: "2025-04-12",
-    item: "Gravel",
-    opening: 220,
-    in: 60,
-    out: 40,
-    closing: 240,
-  },
+  { id: 1, date: "2025-04-10", vendor: "ABC Suppliers", work: "Foundation", quantity: "50 bags", reasonEdit: "-", reasonDelete: "-" },
+  { id: 2, date: "2025-04-10", vendor: "XYZ Traders", work: "Welding", quantity: "20 rods", reasonEdit: "-", reasonDelete: "-" },
+  { id: 3, date: "2025-04-11", vendor: "BuildMart", work: "Masonry", quantity: "1000 pcs", reasonEdit: "-", reasonDelete: "-" },
+  { id: 4, date: "2025-04-12", vendor: "River Supplies", work: "Plastering", quantity: "5 trucks", reasonEdit: "-", reasonDelete: "-" },
+  { id: 5, date: "2025-04-12", vendor: "Stone Depot", work: "Leveling", quantity: "3 trucks", reasonEdit: "-", reasonDelete: "-" },
 ];
 
 export default function Stock() {
   const [date, setDate] = useState("");
-  const [columns, setColumns] = useState(defaultColumns);
-  const [rows, setRows] = useState(() => {
-    const saved = localStorage.getItem("stockData");
-    return saved ? JSON.parse(saved) : stockRows;
-  });
+  const [columns, _setColumns] = useState(defaultColumns);
+  const [rows, _setRows] = useState(() => {
+  const saved = localStorage.getItem("stockData");
+  const parsed = saved ? JSON.parse(saved) : null;
+  return parsed && parsed.length > 0 ? parsed : stockRows;
+});
 
-  const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
-  const [selectedColumnKey, setSelectedColumnKey] = useState("date");
-  const [showFilterRow, setShowFilterRow] = useState(false);
-  const [showManageColumns, setShowManageColumns] = useState(false);
-  const [manageSearch, setManageSearch] = useState("");
+  const [_headerMenuOpen, setHeaderMenuOpen] = useState(false);
+  const [_selectedColumnKey, _setSelectedColumnKey] = useState("date");
+  const [_showFilterRow, _setShowFilterRow] = useState(false);
+  const [_showManageColumns, setShowManageColumns] = useState(false);
+  const [_manageSearch, _setManageSearch] = useState("");
   const [project, setProject] = useState("");
   const projects = ["Project Alpha", "Project Beta", "Project Gamma"];
 
-  const [sortConfig, setSortConfig] = useState({
-    key: "",
-    direction: "",
-  });
-
-  const [filterState, setFilterState] = useState({
-    column: "date",
-    operator: "contains",
-    value: "",
-  });
+  const [_sortConfig, _setSortConfig] = useState({ key: "", direction: "" });
+  const [_filterState, _setFilterState] = useState({ column: "date", operator: "contains", value: "" });
 
   const headerMenuRef = useRef(null);
   const manageColumnsRef = useRef(null);
@@ -107,347 +52,66 @@ export default function Stock() {
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (headerMenuRef.current && !headerMenuRef.current.contains(event.target)) {
-        setHeaderMenuOpen(false);
-      }
-      if (manageColumnsRef.current && !manageColumnsRef.current.contains(event.target)) {
-        setShowManageColumns(false);
-      }
+      if (headerMenuRef.current && !headerMenuRef.current.contains(event.target)) setHeaderMenuOpen(false);
+      if (manageColumnsRef.current && !manageColumnsRef.current.contains(event.target)) setShowManageColumns(false);
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const filteredRows = useMemo(() => {
-    let data = rows.filter((row) => {
-      const dateMatch = date ? row.date === date : true;
-      return dateMatch;
-    });
-
-    if (showFilterRow && filterState.value.trim()) {
-      data = data.filter((row) => {
-        const rowValue = String(row[filterState.column] ?? "").toLowerCase();
-        const filterValue = filterState.value.toLowerCase();
-
-        switch (filterState.operator) {
-          case "contains":
-            return rowValue.includes(filterValue);
-          case "does not contain":
-            return !rowValue.includes(filterValue);
-          case "equals":
-            return rowValue === filterValue;
-          case "does not equal":
-            return rowValue !== filterValue;
-          case "starts with":
-            return rowValue.startsWith(filterValue);
-          case "ends with":
-            return rowValue.endsWith(filterValue);
-          case "is empty":
-            return rowValue.trim() === "";
-          case "is not empty":
-            return rowValue.trim() !== "";
-          default:
-            return true;
-        }
-      });
-    }
-
-    if (sortConfig.key && sortConfig.direction) {
-      data = [...data].sort((a, b) => {
-        const aVal = String(a[sortConfig.key] ?? "").toLowerCase();
-        const bVal = String(b[sortConfig.key] ?? "").toLowerCase();
-
-        if (sortConfig.direction === "asc") {
-          return aVal.localeCompare(bVal);
-        }
-        return bVal.localeCompare(aVal);
-      });
-    }
-
+    let data = rows.filter((row) => (date ? row.date === date : true));
     return data;
-  }, [rows, date, showFilterRow, filterState, sortConfig]);
+  }, [rows, date]);
 
   const visibleColumns = columns.filter((col) => col.visible);
-
-  const toggleColumn = (key) => {
-    setColumns((prev) =>
-      prev.map((col) =>
-        col.key === key ? { ...col, visible: !col.visible } : col
-      )
-    );
-  };
-
-  const toggleAllColumns = () => {
-    const allVisible = columns.every((col) => col.visible);
-    setColumns((prev) =>
-      prev.map((col) => ({ ...col, visible: !allVisible }))
-    );
-  };
-
-  const resetColumns = () => {
-    setColumns(defaultColumns);
-  };
-
-  const searchedColumns = columns.filter((col) =>
-    col.label.toLowerCase().includes(manageSearch.toLowerCase())
-  );
-
-  const openColumnMenu = (key) => {
-    setSelectedColumnKey(key);
-    setFilterState((prev) => ({ ...prev, column: key }));
-    setHeaderMenuOpen((prev) => (selectedColumnKey === key ? !prev : true));
-  };
 
   return (
     <AdminLayout>
       <div className="space-y-4 pt-1">
-        <p className="text-sm md:text-[15px] leading-6 text-muted-foreground">
-          Stock rows are shared with daily site reports (project + date).
-        </p>
+        <p className="text-sm md:text-[15px] leading-6 text-muted-foreground">Stock rows are shared with daily site reports (project + date).</p>
 
         <div className="rounded-[28px] border border-border bg-card p-4 md:p-5 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-
-  {/* PROJECT DROPDOWN */}
-  <div className="relative min-w-[220px]">
-    <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-      Project
-    </label>
-
-    <select
-      value={project}
-      onChange={(e) => setProject(e.target.value)}
-      className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 appearance-none text-foreground"
-    >
-      <option value="">Select Project</option>
-      {projects.map((p) => (
-        <option key={p} value={p}>
-          {p}
-        </option>
-      ))}
-    </select>
-
-    <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-  </div>
-
-  {/* DATE */}
-  <div className="relative min-w-[220px]">
-    <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-      Date
-    </label>
-    <input
-      type="date"
-      value={date}
-      onChange={(e) => setDate(e.target.value)}
-      className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-    />
-  </div>
-
-  {/* CLEAR */}
-  <button
-    type="button"
-    onClick={() => {
-      setDate("");
-      setProject("");
-    }}
-    className="text-sm font-semibold text-foreground hover:text-primary transition self-start sm:self-center"
-  >
-    Clear
-  </button>
-
-</div>
- </div>           
-
-           
-
-        <div className="rounded-[28px] border border-border bg-card shadow-sm overflow-visible relative min-h-[420px]">
-          <div className="overflow-x-auto rounded-[28px]">
-            <table className="w-full text-sm border border-gray-300 border-collapse">
-              <thead className="bg-gray-50">
-  <tr>
-    <th className="border border-gray-300 px-4 py-4 text-left font-semibold">Date</th>
-    <th className="border border-gray-300 px-4 py-4 text-left font-semibold">Item</th>
-    <th className="border border-gray-300 px-4 py-4 text-left font-semibold">Opening</th>
-    <th className="border border-gray-300 px-4 py-4 text-left font-semibold">In</th>
-    <th className="border border-gray-300 px-4 py-4 text-left font-semibold">Out</th>
-    <th className="border border-gray-300 px-4 py-4 text-left font-semibold">Closing</th>
-  </tr>
-</thead>
-
-              <tbody>
-                {showFilterRow && (
-                  <tr className="border-b border-border">
-                  <td className="border border-border px-4 py-3">
-                      <div className="max-w-[660px] rounded-2xl bg-card shadow-xl border border-border p-5 flex items-center gap-4">
-                        <button
-                          type="button"
-                          onClick={() => setShowFilterRow(false)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-secondary transition"
-                        >
-                          <X className="w-5 h-5 text-muted-foreground" />
-                        </button>
-
-                        <div className="relative min-w-[170px]">
-                          <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                            Columns
-                          </label>
-                          <select
-                            value={filterState.column}
-                            onChange={(e) =>
-                              setFilterState((prev) => ({
-                                ...prev,
-                                column: e.target.value,
-                              }))
-                            }
-                            className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 appearance-none"
-                          >
-                            {columns.map((col) => (
-                              <option key={col.key} value={col.key}>
-                                {col.label}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        </div>
-
-                        <div className="relative min-w-[170px]">
-                          <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                            Operator
-                          </label>
-                          <select
-                            value={filterState.operator}
-                            onChange={(e) =>
-                              setFilterState((prev) => ({
-                                ...prev,
-                                operator: e.target.value,
-                              }))
-                            }
-                            className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 appearance-none"
-                          >
-                            <option value="contains">contains</option>
-                            <option value="does not contain">does not contain</option>
-                            <option value="equals">equals</option>
-                            <option value="does not equal">does not equal</option>
-                            <option value="starts with">starts with</option>
-                            <option value="ends with">ends with</option>
-                            <option value="is empty">is empty</option>
-                            <option value="is not empty">is not empty</option>
-                          </select>
-                          <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        </div>
-
-                        <div className="relative flex-1 min-w-[210px]">
-                          <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                            Value
-                          </label>
-                          <input
-                            type="text"
-                            value={filterState.value}
-                            onChange={(e) =>
-                              setFilterState((prev) => ({
-                                ...prev,
-                                value: e.target.value,
-                              }))
-                            }
-                            placeholder="Filter value"
-                            className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30"
-                          />
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-
-                {filteredRows.length === 0 ? (
-                  <tr>
-                    <td
-  key={col.key}
-  className="border border-gray-300 px-4 py-3 text-foreground whitespace-nowrap"
->
-  {row[col.key]}
-</td>
-                  </tr>
-                ) : (
-                  filteredRows.map((row) => (
-                    <tr key={row.id}>
-                      {visibleColumns.map((col) => (
-  <td
-    key={col.key}
-    className="border border-gray-300 px-4 py-3 text-foreground whitespace-nowrap"
-  >
-    {row[col.key]}
-  </td>
-))}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {showManageColumns && (
-            <div
-              ref={manageColumnsRef}
-              className="absolute left-2 top-[95px] w-[335px] rounded-2xl border border-border bg-card shadow-xl z-50 overflow-hidden"
-            >
-              <div className="p-4 border-b border-border">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input
-                    value={manageSearch}
-                    onChange={(e) => setManageSearch(e.target.value)}
-                    type="text"
-                    placeholder="Search"
-                    className="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-background"
-                  />
-                </div>
-              </div>
-
-              <div className="p-4 space-y-4 max-h-[320px] overflow-y-auto sidebar-scroll-hidden">
-                {searchedColumns.map((col) => (
-                  <button
-                    key={col.key}
-                    type="button"
-                    onClick={() => toggleColumn(col.key)}
-                    className="w-full flex items-center gap-3 text-left"
-                  >
-                    <span
-                      className={`w-5 h-5 rounded-md flex items-center justify-center border transition ${
-                        col.visible
-                          ? "bg-primary border-primary text-primary-foreground"
-                          : "bg-background border-border text-transparent"
-                      }`}
-                    >
-                      {col.visible && <Check className="w-4 h-4" />}
-                    </span>
-                    <span className="text-foreground">{col.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="border-t border-border p-4 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={toggleAllColumns}
-                  className="flex items-center gap-3 text-foreground"
-                >
-                  <span className="w-5 h-5 rounded-md bg-primary text-primary-foreground flex items-center justify-center border border-primary">
-                    <Check className="w-4 h-4" />
-                  </span>
-                  <span>Show/Hide All</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={resetColumns}
-                  className="text-muted-foreground hover:text-foreground transition"
-                >
-                  Reset
-                </button>
-              </div>
+            <div className="relative min-w-[220px]">
+              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">Project</label>
+              <select value={project} onChange={(e) => setProject(e.target.value)} className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 appearance-none text-foreground">
+                <option value="">Select Project</option>
+                {projects.map((p) => (<option key={p} value={p}>{p}</option>))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             </div>
-          )}
+            <div className="relative min-w-[220px]">
+              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">Date</label>
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            <button type="button" onClick={() => { setDate(""); setProject(""); }} className="text-sm font-semibold text-foreground hover:text-primary transition self-start sm:self-center">Clear</button>
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border overflow-hidden overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <table className="w-full text-sm border-collapse min-w-[800px]">
+            <thead>
+              <tr className="bg-secondary/50">
+                {visibleColumns.map((col) => (
+                  <th key={col.key} className="py-3 px-4 font-semibold text-foreground text-center border-b border-border border-r border-border last:border-r-0">{col.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRows.length === 0 ? (
+                <tr><td colSpan={visibleColumns.length} className="py-10 text-center text-muted-foreground">No rows found</td></tr>
+              ) : (
+                filteredRows.map((row) => (
+                  <tr key={row.id} className="hover:bg-secondary/30 transition">
+                    {visibleColumns.map((col) => (
+                      <td key={col.key} className="py-3 px-4 border-b border-border border-r border-border last:border-r-0 text-center whitespace-nowrap">{row[col.key] ?? "-"}</td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </AdminLayout>

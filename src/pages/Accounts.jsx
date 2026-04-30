@@ -284,7 +284,7 @@ const fetchProjects = async () => {
             Current Balance: ₹{totalAllocated.toLocaleString()}
           </div>
 
-          <div className="bg-card rounded-xl border border-border overflow-hidden overflow-x-auto">
+          <div className="bg-card rounded-xl border border-border overflow-hidden overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
   <table className="w-full text-sm border-collapse min-w-[650px]">
 
     {/* HEADER */}
@@ -455,7 +455,6 @@ const fetchProjects = async () => {
     const selectedUser = users.find(
       (u) => u.id == e.target.value
     );
-
     setFormData((prev) => ({
       ...prev,
       user_id: e.target.value,
@@ -463,7 +462,7 @@ const fetchProjects = async () => {
       mailId: selectedUser?.email || "",
     }));
   }}
-  className="w-full border px-3 py-2 rounded"
+  className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground appearance-none focus:outline-none focus:ring-2 focus:ring-primary/30"
 >
   <option value="">Select user</option>
 
@@ -484,14 +483,13 @@ const fetchProjects = async () => {
   value={formData.name}
   readOnly
   placeholder="Name"
-  className="w-full h-11 rounded-2xl border border-border bg-gray-100 px-4"
+  className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground placeholder:text-muted-foreground"
 />
-
           <div className="relative">
             <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
               Project
             </label>
-           <select
+          <select
   value={formData.project_id}
   onChange={(e) =>
     setFormData((prev) => ({
@@ -499,7 +497,7 @@ const fetchProjects = async () => {
       project_id: e.target.value,
     }))
   }
-  className="w-full border px-3 py-2 rounded"
+  className="w-full h-11 rounded-2xl border border-border bg-background px-4 pr-10 text-foreground appearance-none focus:outline-none focus:ring-2 focus:ring-primary/30"
 >
   <option value="">Select project</option>
 

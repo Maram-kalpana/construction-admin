@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ChevronDown,
   ArrowUp,
@@ -22,19 +22,11 @@ const defaultColumns = [
   { key: "f", label: "F", visible: true },
   { key: "workDone", label: "Work done", visible: true },
   { key: "measurements", label: "Measurements", visible: true },
+  { key: "reasonEdit", label: "Reason(Edit)", visible: true },
+{ key: "reasonDelete", label: "Reason(Delete)", visible: true }, 
 ];
 
-const dummyProjects = [
-  { id: 1, name: "Project Alpha" },
-  { id: 2, name: "Project Beta" },
-  { id: 3, name: "Project Gamma" },
-];
 
-const dummyLabourData = [
-  { id: 1, project: "Project Alpha", date: "2025-04-10", party: "Labour Team A", m: 12, f: 4, workDone: "Brick masonry", measurements: "120 sq ft" },
-  { id: 2, project: "Project Alpha", date: "2025-04-11", party: "Labour Team B", m: 8, f: 3, workDone: "Plastering", measurements: "85 sq ft" },
-  { id: 3, project: "Project Alpha", date: "2025-04-12", party: "Labour Team C", m: 10, f: 2, workDone: "Shuttering", measurements: "60 sq ft" },
-];
 
 export default function Labour() {
   
@@ -46,21 +38,17 @@ export default function Labour() {
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
   const [selectedColumnKey, setSelectedColumnKey] = useState("date");
   const [showFilterRow, setShowFilterRow] = useState(false);
-  const [showManageColumns, setShowManageColumns] = useState(false);
+  const [showManageColumns, _setShowManageColumns] = useState(false);
   const [manageSearch, setManageSearch] = useState("");
 
-  const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
+  const [_sortConfig, _setSortConfig] = useState({ key: "", direction: "" });
   const [filterState, setFilterState] = useState({ column: "date", operator: "contains", value: "" });
 
-  const headerMenuRef = useRef(null);
+  const _headerMenuRef = useRef(null);
   const manageColumnsRef = useRef(null);
   const [projects, setProjects] = useState([]);
 
-  useEffect(() => {
-  fetchProjects();
-  fetchReports();
-}, []);
-
+  
 const fetchProjects = async () => {
   try {
     const res = await getProjects();
@@ -100,6 +88,8 @@ const fetchReports = async () => {
   f: item.female_unskilled,
   workDone: item.work_done,
   measurements: "-",
+  reasonEdit: "-",
+reasonDelete: "-",
 }));
 
     setRows(formatted);
@@ -107,7 +97,13 @@ const fetchReports = async () => {
   } catch (err) {
     console.log("Error fetching reports:", err);
   }
-};
+}; 
+
+useEffect(() => {
+  fetchProjects();
+  fetchReports();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
   const filteredRows = rows;
   const visibleColumns = columns.filter((col) => col.visible);
 
@@ -126,7 +122,7 @@ const fetchReports = async () => {
 
   const resetColumns = () => setColumns(defaultColumns);
 
-  const openColumnMenu = (key) => {
+   const _openColumnMenu = (key) => {
     setSelectedColumnKey(key);
     setFilterState((prev) => ({ ...prev, column: key }));
     setHeaderMenuOpen((prev) => (selectedColumnKey === key ? !prev : true));
@@ -162,15 +158,22 @@ const fetchReports = async () => {
             </div>
 
             <div className="relative min-w-[185px]">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30 dark:[color-scheme:dark]"
-              />
-            </div>
-          </div>
+    <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">Date</label>
+    <input
+      type="date"
+      value={date}
+      onChange={(e) => setDate(e.target.value)}
+      className="w-full h-11 rounded-2xl border border-border bg-background px-4 text-foreground outline-none focus:ring-2 focus:ring-primary/30 dark:[color-scheme:dark]"
+    />
+  </div>
+  <button
+    type="button"
+    onClick={() => setDate("")}
+    className="text-sm font-semibold text-foreground hover:text-primary flex-shrink-0"
+  >
+    Clear
+  </button>
+</div>
         </div>
 
         {/* NICHE WALA BOX (Now with perfect rounded corners like the top box) */}
@@ -180,12 +183,10 @@ const fetchReports = async () => {
               <thead>
                 <tr className="border-b border-border bg-card">
                   {visibleColumns.map((col) => {
-                    const isSorted = sortConfig.key === col.key;
-                    const isAsc = isSorted && sortConfig.direction === "asc";
-                    const isDesc = isSorted && sortConfig.direction === "desc";
+                   
 
                     return (
-                    <th className="border border-border px-4 py-4 text-left font-semibold whitespace-nowrap">
+                    <th className="border border-border px-4 py-4 text-center font-semibold whitespace-nowrap">
   {col.label}
 </th>
                     );
@@ -235,7 +236,7 @@ const fetchReports = async () => {
                   filteredRows.map((row, index) => (
                     <tr key={index} className="border-b border-border last:border-0">
                       {visibleColumns.map((col) => (
-                        <td key={col.key} className="py-4 px-4 text-foreground whitespace-nowrap">
+                        <td key={col.key} className="py-4 px-4 text-foreground whitespace-nowrap text-center">
                           {row[col.key] ?? "-"}
                         </td>
                       ))}

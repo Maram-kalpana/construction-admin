@@ -117,6 +117,7 @@ export default function Sidebar({ isOpen, onClose }) {
         { label: "Projects", icon: FolderKanban, path: "/dashboard/projects" },
         { label: "Users", icon: Users, path: "/dashboard/users" },
         { label: "Vendors", icon: Truck, path: "/dashboard/vendors" },
+        { label: "Items", icon: Zap, path: "/dashboard/items" },
         { label: "Accounts", icon: Shield, path: "/dashboard/accounts" },
       ],
     },
@@ -128,7 +129,7 @@ export default function Sidebar({ isOpen, onClose }) {
         { label: "Stock", icon: Boxes, path: "/dashboard/stock" },
         { label: "Materials", icon: BrickWall, path: "/dashboard/materials" },
         { label: "Machinery", icon: Wrench, path: "/dashboard/machinery" },
-        { label: "Reports", icon: FileBarChart2, path: "/dashboard/reports" },
+       // { label: "Reports", icon: FileBarChart2, path: "/dashboard/reports" },
       ],
     },
     {

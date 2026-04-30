@@ -9,6 +9,7 @@ import Accounts from "../pages/Accounts";
 import Expenses from "../pages/Expenses";
 import Labour from "../pages/Labour";
 import Vendor from "../pages/Vendor";
+import Items from "../pages/Items";
 import Stock from "../pages/Stock";
 import Materials from "../pages/Materials";
 import Machinery from "../pages/Machinery";
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       { path: "expenses", element: <Expenses /> },
       { path: "labour", element: <Labour /> },
       { path: "vendors", element: <Vendor /> },
+      { path: "items", element: <Items /> },
       { path: "stock", element: <Stock /> },
       { path: "materials", element: <Materials /> },
       { path: "machinery", element: <Machinery /> },

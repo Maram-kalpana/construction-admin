@@ -92,81 +92,71 @@ export default function Materials() {
             </div>
 
             {/* Date Filter */}
-            <div className="relative min-w-[220px]">
-              <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
-                Date
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full h-11 rounded-2xl border border-border bg-background px-4"
-              />
-            </div>
+           {/* Date Filter */}
+<div className="flex items-center gap-3">
+  <div className="relative min-w-[220px]">
+    <label className="absolute left-4 -top-2.5 bg-card px-1 text-xs text-muted-foreground">
+      Date
+    </label>
+    <input
+      type="date"
+      value={date}
+      onChange={(e) => setDate(e.target.value)}
+      className="w-full h-11 rounded-2xl border border-border bg-background px-4"
+    />
+  </div>
+  <button
+    type="button"
+    onClick={() => setDate("")}
+    className="text-sm font-semibold text-foreground hover:text-primary flex-shrink-0"
+  >
+    Clear
+  </button>
+</div>
 
           </div>
         </div>
 
         {/* ✅ TABLE */}
-        <div className="bg-card rounded-[28px] border border-border shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+        
+          <div className="bg-card rounded-xl border border-border overflow-hidden overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 
-            <table className="w-full border-separate border-spacing-0 text-sm min-w-[1000px]">
+            <table className="w-full border-collapse text-sm min-w-[500px]">
               <thead>
-                <tr className="bg-secondary/30">
-                  <th rowSpan="2" className="px-4 py-4 border">S.No</th>
-                  <th rowSpan="2" className="px-4 py-4 border">Date</th>
-                  <th rowSpan="2" className="px-4 py-4 border">Supplier</th>
-
-                  {/* ✅ Units added */}
-                  <th rowSpan="2" className="px-4 py-4 border">Gravel (m³)</th>
-                  <th rowSpan="2" className="px-4 py-4 border">Sand (m³)</th>
-
-                  <th colSpan="3" className="px-4 py-4 border">AGGREGATE</th>
-                  <th colSpan="2" className="px-4 py-4 border">BRICKS</th>
-
-                  <th rowSpan="2" className="px-4 py-4 border">RR Stone (m³)</th>
-                  
-                </tr>
-
-                <tr className="bg-secondary/15">
-                  <th className="px-4 py-3 border">10 mm</th>
-                  <th className="px-4 py-3 border">20 mm</th>
-                  <th className="px-4 py-3 border">40 mm</th>
-                  <th className="px-4 py-3 border">Fly Ash</th>
-                  <th className="px-4 py-3 border">Red Brick</th>
+                <tr className="bg-secondary/50">
+                  <th className="py-3 px-4 font-semibold text-foreground text-left border-b border-border border-r border-border">S.No</th>
+                  <th className="py-3 px-4 font-semibold text-foreground text-left border-b border-border border-r border-border">Date</th>
+                  <th className="py-3 px-4 font-semibold text-foreground text-left border-b border-border border-r border-border">Vendor</th>
+                  <th className="py-3 px-4 font-semibold text-foreground text-left border-b border-border border-r border-border">Item Name</th>
+                  <th className="py-3 px-4 font-semibold text-foreground text-right border-b border-border border-r border-border">Quantity</th>
+                  <th className="py-3 px-4 font-semibold text-foreground text-center border-b border-border border-r border-border">Reason(Edit)</th>
+<th className="py-3 px-4 font-semibold text-foreground text-center border-b border-border">Reason(Delete)</th>
                 </tr>
               </thead>
-
               <tbody>
                 {filteredRows.length === 0 ? (
                   <tr>
-                    <td colSpan="11" className="text-center py-10">
+                   <td colSpan="7" className="text-center py-10 text-muted-foreground">
                       No data found
                     </td>
                   </tr>
                 ) : (
-                  filteredRows.map((row) => (
-                    <tr key={row.sno} className="hover:bg-secondary/10">
-                      <td className="border px-4 py-3">{row.sno}</td>
-                      <td className="border px-4 py-3">{row.date}</td>
-                      <td className="border px-4 py-3">{row.supplier}</td>
-                      <td className="border px-4 py-3">{row.gravel}</td>
-                      <td className="border px-4 py-3">{row.sand}</td>
-                      <td className="border px-4 py-3">{row.mm10}</td>
-                      <td className="border px-4 py-3">{row.mm20}</td>
-                      <td className="border px-4 py-3">{row.mm40}</td>
-                      <td className="border px-4 py-3">{row.flyAsh}</td>
-                      <td className="border px-4 py-3">{row.redBrick}</td>
-                      <td className="border px-4 py-3">{row.rrStone}</td>
-                      
+                   filteredRows.map((row) => (
+                    <tr key={row.sno} className="hover:bg-secondary/30 transition">
+                      <td className="py-3 px-4 border-b border-border border-r border-border">{row.sno}</td>
+                      <td className="py-3 px-4 border-b border-border border-r border-border whitespace-nowrap">{row.date}</td>
+                      <td className="py-3 px-4 border-b border-border border-r border-border">{row.supplier}</td>
+                      <td className="py-3 px-4 border-b border-border border-r border-border">{row.others}</td>
+                      <td className="py-3 px-4 border-b border-border border-r border-border text-right">{row.gravel}</td>
+                      <td className="py-3 px-4 border-b border-border border-r border-border text-center">-</td>
+<td className="py-3 px-4 border-b border-border text-center">-</td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
 
-          </div>
+          
         </div>
 
       </div>

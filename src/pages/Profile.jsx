@@ -48,13 +48,7 @@ export default function Profile() {
             View and manage your account details.
           </p>
 
-          <button
-            onClick={handleSave}
-            className="h-10 px-4 rounded-xl bg-blue-600 text-white text-sm font-semibold shadow-md shadow-blue-600/20 hover:bg-blue-700 transition flex items-center gap-2"
-          >
-            <Save className="w-4 h-4" />
-            Save Profile
-          </button>
+         
         </div>
 
         {/* 👇 BOX HATA KAR SIRF SIMPLE GREEN TEXT KAR DIYA HAI 👇 */}

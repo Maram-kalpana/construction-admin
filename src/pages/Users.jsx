@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Search,
   Plus,
@@ -68,9 +68,10 @@ export default function Users() {
     console.error(error);
   }
 }; 
-const hasFetched = useRef(false);
+
 useEffect(() => {
   fetchUsers();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [page]);
 
   const filteredUsers = useMemo(() => {
@@ -244,7 +245,7 @@ const _handleUpdateUser = async () => {
           </div>
 
           {/* TABLE */}
-          <div className="bg-card rounded-xl border border-border overflow-hidden overflow-x-auto">
+          <div className="bg-card rounded-xl border border-border overflow-hidden overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <table className="w-full text-sm border-collapse min-w-[800px]">
   <thead>
     <tr className="bg-secondary/50">
@@ -295,23 +296,23 @@ const _handleUpdateUser = async () => {
   </tbody>
 </table>
           </div>
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mt-4 px-4">
-  <button
+          <div className="flex flex-row justify-between items-center gap-3 mt-4 px-4">
+ <button
     onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
     disabled={page === 1}
-    className="px-4 py-2 border rounded disabled:opacity-50"
+    className="px-4 py-2 rounded-lg border border-border text-sm disabled:opacity-50 hover:bg-secondary transition"
   >
     Previous
   </button>
 
-  <span className="text-sm">
+  <span className="text-sm text-muted-foreground font-medium">
     Page {page} of {totalPages}
   </span>
 
   <button
     onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
     disabled={page === totalPages}
-    className="px-4 py-2 border rounded disabled:opacity-50"
+    className="px-4 py-2 rounded-lg border border-border text-sm disabled:opacity-50 hover:bg-secondary transition"
   >
     Next
   </button>
